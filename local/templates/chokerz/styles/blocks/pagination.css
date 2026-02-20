@@ -1,0 +1,50 @@
+/* ========================================
+   Блок: Пагинация (Pagination)
+   ======================================== */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination__item {
+    list-style: none;
+}
+
+.pagination__link {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    text-align: center;
+    transition: all 0.3s ease;
+    min-width: 40px;
+}
+
+.pagination__link:hover,
+.pagination__link--active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+}
+
+.pagination__link--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination__link--prev,
+.pagination__link--next {
+    min-width: 60px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .pagination__link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}

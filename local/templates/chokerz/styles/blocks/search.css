@@ -1,0 +1,68 @@
+/* ========================================
+   Блок: Поиск (Search)
+   ======================================== */
+
+.search {
+    position: relative;
+}
+
+.search__form {
+    display: flex;
+    align-items: center;
+}
+
+.search__input {
+    padding: 0.75rem 1rem 0.75rem 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 200px;
+}
+
+.search__input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+}
+
+.search__btn {
+    padding: 0.75rem 1rem;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search__btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.search__icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .search__input {
+        width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .search__input {
+        width: 120px;
+        font-size: 0.875rem;
+        padding: 0.625rem 0.75rem 0.625rem 1.25rem;
+    }
+    
+    .search__btn {
+        padding: 0.625rem;
+    }
+}

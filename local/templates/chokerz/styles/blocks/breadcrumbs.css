@@ -1,0 +1,39 @@
+/* ========================================
+   Блок: Хлебные крошки (Breadcrumbs)
+   ======================================== */
+
+.breadcrumbs {
+    padding: 1rem 0;
+    background-color: var(--color-bg-light);
+}
+
+.breadcrumbs__list {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    font-size: 0.875rem;
+}
+
+.breadcrumbs__item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumbs__link {
+    color: var(--color-text);
+    transition: color 0.3s ease;
+}
+
+.breadcrumbs__link:hover {
+    color: var(--color-primary);
+}
+
+.breadcrumbs__separator {
+    color: var(--color-text-muted);
+    margin: 0 0.5rem;
+}
+
+.breadcrumbs__current {
+    color: var(--color-text);
+    font-weight: 500;
+}

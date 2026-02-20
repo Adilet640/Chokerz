@@ -8,9 +8,10 @@ modules:
   - id: main
     name: Главная страница
     status: ready
-    files: []
+    files:
+    - local/templates/chokerz/index.php
     description: null
-    current_task: Создание структуры /local/ и шаблона сайта chokerz
+    current_task: null
     priority: null
   - id: styles
     name: Стили

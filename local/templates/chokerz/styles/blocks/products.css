@@ -1,0 +1,86 @@
+/* ========================================
+   Блок: Секция товаров (Products)
+   ======================================== */
+
+.products-hit,
+.products-new {
+    padding: 6rem 0;
+}
+
+.products-hit__container,
+.products-new__container {
+    /* Контейнер уже стилизован в .container */
+}
+
+.products-hit__header,
+.products-new__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.products-hit__title,
+.products-new__title {
+    margin-bottom: 0;
+}
+
+.products-hit__link,
+.products-new__link {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    transition: opacity 0.3s ease;
+}
+
+.products-hit__link:hover,
+.products-new__link:hover {
+    opacity: 0.7;
+}
+
+/* Сетка товаров */
+.products-hit__grid,
+.products-new__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.products-hit__item,
+.products-new__item {
+    /* Стили карточки товара определены в блоке .card */
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .products-hit__grid,
+    .products-new__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .products-hit__grid,
+    .products-new__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .products-hit,
+    .products-new {
+        padding: 3rem 0;
+    }
+    
+    .products-hit__header,
+    .products-new__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .products-hit__grid,
+    .products-new__grid {
+        grid-template-columns: 1fr;
+    }
+}

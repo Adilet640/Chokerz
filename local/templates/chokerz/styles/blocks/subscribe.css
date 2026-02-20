@@ -1,0 +1,102 @@
+/* ========================================
+   Блок: Подписка (Subscribe)
+   ======================================== */
+
+.subscribe {
+    padding: 6rem 0;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white);
+    text-align: center;
+}
+
+.subscribe__container {
+    /* Контейнер уже стилизован в .container */
+}
+
+.subscribe__content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.subscribe__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.subscribe__desc {
+    font-size: 1.25rem;
+    color: var(--color-white-muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Форма подписки */
+.subscribe__form {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.subscribe__input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: 2px solid var(--color-white);
+    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.subscribe__input::placeholder {
+    color: var(--color-white-muted);
+}
+
+.subscribe__input:focus {
+    border-color: var(--color-white);
+    background-color: rgba(255, 255, 255, 0.15);
+    outline: none;
+}
+
+.subscribe__btn {
+    padding: 1rem 2rem;
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.subscribe__btn:hover {
+    background-color: var(--color-white-muted);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .subscribe {
+        padding: 4rem 0;
+    }
+    
+    .subscribe__title {
+        font-size: 2rem;
+    }
+    
+    .subscribe__desc {
+        font-size: 1.125rem;
+    }
+    
+    .subscribe__form {
+        flex-direction: column;
+    }
+    
+    .subscribe__input,
+    .subscribe__btn {
+        width: 100%;
+    }
+}
