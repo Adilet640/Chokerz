@@ -7,14 +7,14 @@ modules:
   features:
   - id: main
     name: Главная страница
-    status: in_progress
+    status: ready
     files: []
     description: null
     current_task: Создание структуры /local/ и шаблона сайта chokerz
     priority: null
   - id: styles
     name: Стили
-    status: not_started
+    status: ready
     files:
     - local/templates/chokerz/styles/base/_reset.css
     description: Глобальные стили и дизайн-система

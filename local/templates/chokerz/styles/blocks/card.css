@@ -1,0 +1,191 @@
+/* ========================================
+   Карточка товара (Card)
+   ======================================== */
+
+.card {
+    background-color: var(--color-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+/* Изображение */
+.card__image-wrapper {
+    position: relative;
+    padding-top: 100%; /* Квадратное изображение */
+    background-color: var(--color-bg-light);
+    overflow: hidden;
+}
+
+.card__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-normal);
+}
+
+.card:hover .card__image {
+    transform: scale(1.05);
+}
+
+/* Бейджи */
+.card__badges {
+    position: absolute;
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    z-index: 1;
+}
+
+.card__badge {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-sm);
+    color: var(--color-bg);
+}
+
+.card__badge--new {
+    background-color: var(--color-primary);
+}
+
+.card__badge--sale {
+    background-color: var(--color-danger);
+}
+
+.card__badge--stock {
+    background-color: var(--color-success);
+}
+
+/* Скидка */
+.card__discount {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background-color: var(--color-danger);
+    color: var(--color-bg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    z-index: 1;
+}
+
+/* Контент */
+.card__content {
+    padding: var(--spacing-lg);
+}
+
+.card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card__title a {
+    color: inherit;
+    transition: color var(--transition-fast);
+}
+
+.card__title a:hover {
+    color: var(--color-primary);
+}
+
+/* Цена */
+.card__price-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.card__price-current {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+.card__price-old {
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+}
+
+/* Акции */
+.card__promo {
+    font-size: var(--font-size-sm);
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Действия */
+.card__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.card__btn {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Варианты */
+.card--horizontal {
+    display: flex;
+    align-items: center;
+}
+
+.card--horizontal .card__image-wrapper {
+    width: 200px;
+    min-width: 200px;
+    padding-top: 0;
+    aspect-ratio: 1;
+}
+
+.card--horizontal .card__content {
+    flex: 1;
+    padding: var(--spacing-md);
+}
+
+/* Точки останова */
+@media (max-width: 768px) {
+    .card__title {
+        font-size: var(--font-size-md);
+    }
+    
+    .card__price-current {
+        font-size: var(--font-size-lg);
+    }
+    
+    .card__price-old {
+        font-size: var(--font-size-sm);
+    }
+}
+
+@media (max-width: 576px) {
+    .card__content {
+        padding: var(--spacing-md);
+    }
+    
+    .card--horizontal .card__image-wrapper {
+        width: 120px;
+        min-width: 120px;
+    }
+}
