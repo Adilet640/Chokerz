@@ -1,0 +1,55 @@
+# Git ignore для 1С-Битрикс
+
+# Кэш
+/bitrix/cache/
+/bitrix/managed_cache/
+/bitrix/stack_cache/
+/bitrix/html_pages/
+/bitrix/catalog_export/
+
+# Логи
+/bitrix/modules/*.log
+/bitrix/modules/*/*.log
+/bitrix/php_interface/dbconn.php
+/bitrix/.settings.php
+/bitrix/.settings.additional.php
+
+# Загрузки
+/upload/iblock/
+/upload/resize_cache/
+/upload/tmp/
+
+# База данных
+*.sql
+*.sql.gz
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Окружение
+.env
+.env.local
+.env.production
+
+# Node modules
+node_modules/
+
+# Composer
+/vendor/
+composer.lock
+
+# Тестовые файлы
+*.test.php
+*.spec.php
+
+# Backup
+*.bak
+*.backup
+
+# Uploads (кроме нужных файлов)
+!/upload/resize_cache/webp/

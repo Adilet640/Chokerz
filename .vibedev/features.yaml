@@ -1,0 +1,14 @@
+project:
+  created: '2026-02-20T14:41:38.585586'
+modules:
+- id: landing
+  name: Лендинг
+  icon: layout
+  features:
+  - id: main
+    name: Главная страница
+    status: not_started
+    files: []
+    description: null
+    current_task: null
+    priority: null
