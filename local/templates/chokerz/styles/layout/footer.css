@@ -1,0 +1,211 @@
+/* ========================================
+   Подвал сайта (Footer)
+   ======================================== */
+
+.footer {
+    background-color: var(--color-bg-light);
+    padding: var(--spacing-3xl) 0 0;
+    margin-top: auto;
+}
+
+.footer__container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: var(--spacing-3xl);
+    padding-bottom: var(--spacing-3xl);
+}
+
+/* Бренд */
+.footer__brand {
+    grid-column: span 1;
+}
+
+.footer__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.footer__logo-img {
+    height: 40px;
+    width: auto;
+}
+
+.footer__logo-text {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+.footer__desc {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+}
+
+/* Навигация */
+.footer__nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xl);
+}
+
+.footer__nav-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.footer__nav-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+}
+
+.footer__nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.footer__nav-list a {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    transition: color var(--transition-fast);
+}
+
+.footer__nav-list a:hover {
+    color: var(--color-primary);
+}
+
+/* Контакты */
+.footer__contacts {
+    grid-column: span 1;
+}
+
+.footer__contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.footer__contact-item:last-child {
+    margin-bottom: 0;
+}
+
+.footer__contact-item svg {
+    flex-shrink: 0;
+    color: var(--color-primary);
+}
+
+/* Нижняя часть футера */
+.footer__bottom {
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-lg) 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+}
+
+.footer__copyright {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.footer__social {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.footer__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+}
+
+.footer__social-link:hover {
+    background-color: var(--color-bg);
+    color: var(--color-primary);
+}
+
+.footer__legal {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.footer__legal a {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-fast);
+}
+
+.footer__legal a:hover {
+    color: var(--color-primary);
+}
+
+/* Точки останова */
+@media (max-width: 992px) {
+    .footer__container {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer__brand,
+    .footer__nav,
+    .footer__contacts {
+        grid-column: span 1;
+    }
+    
+    .footer__nav {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .footer__container {
+        gap: var(--spacing-2xl);
+        padding-bottom: var(--spacing-2xl);
+    }
+    
+    .footer__nav {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer__bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer__copyright,
+    .footer__legal {
+        width: 100%;
+    }
+    
+    .footer__legal {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 576px) {
+    .footer__nav {
+        gap: var(--spacing-lg);
+    }
+    
+    .footer__nav-col {
+        gap: var(--spacing-xs);
+    }
+}

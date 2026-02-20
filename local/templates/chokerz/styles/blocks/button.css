@@ -1,0 +1,223 @@
+/* ========================================
+   Кнопки (Button)
+   ======================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-align: center;
+    border: 1px solid transparent;
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    white-space: nowrap;
+}
+
+/* Состояния */
+.btn:hover {
+    background-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Размеры */
+.btn--sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.btn--lg {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+}
+
+.btn--xl {
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Варианты */
+.btn--primary {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+}
+
+.btn--primary:hover {
+    background-color: var(--color-accent);
+}
+
+.btn--secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-bg);
+}
+
+.btn--secondary:hover {
+    background-color: #21867a;
+}
+
+.btn--outline {
+    background-color: transparent;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn--outline:hover {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+}
+
+.btn--outline-secondary {
+    background-color: transparent;
+    color: var(--color-secondary);
+    border-color: var(--color-secondary);
+}
+
+.btn--outline-secondary:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-bg);
+}
+
+.btn--light {
+    background-color: var(--color-bg-light);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.btn--light:hover {
+    background-color: var(--color-bg-muted);
+}
+
+.btn--dark {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+}
+
+.btn--dark:hover {
+    background-color: #1a323b;
+}
+
+.btn--success {
+    background-color: var(--color-success);
+    color: var(--color-bg);
+}
+
+.btn--success:hover {
+    background-color: #218639;
+}
+
+.btn--danger {
+    background-color: var(--color-danger);
+    color: var(--color-bg);
+}
+
+.btn--danger:hover {
+    background-color: #c82333;
+}
+
+.btn--warning {
+    background-color: var(--color-warning);
+    color: var(--color-text);
+}
+
+.btn--warning:hover {
+    background-color: #e0a800;
+}
+
+.btn--info {
+    background-color: var(--color-info);
+    color: var(--color-bg);
+}
+
+.btn--info:hover {
+    background-color: #138496;
+}
+
+/* Полная ширина */
+.btn--block {
+    width: 100%;
+}
+
+/* С иконкой */
+.btn--icon {
+    padding: var(--spacing-sm);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+}
+
+.btn--icon.btn--sm {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.btn--icon.btn--lg {
+    width: 48px;
+    height: 48px;
+}
+
+/* Группа кнопок */
+.btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.btn-group .btn:last-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.btn-group .btn:only-child {
+    border-radius: var(--radius-md);
+}
+
+/* Точки останова */
+@media (max-width: 576px) {
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        border-radius: var(--radius-md) !important;
+    }
+}

@@ -1,0 +1,111 @@
+/* ========================================
+   Переменные и константы
+   ======================================== */
+
+:root {
+    /* Цвета бренда */
+    --color-primary: #FF6B35;        /* Основной цвет (оранжевый) */
+    --color-secondary: #2A9D8F;      /* Вторичный цвет (бирюзовый) */
+    --color-accent: #E76F51;         /* Акцентный цвет */
+    
+    /* Цвета текста */
+    --color-text: #264653;           /* Основной текст */
+    --color-text-light: #2A9D8F;     /* Светлый текст */
+    --color-text-muted: #6C757D;     /* Приглушенный текст */
+    
+    /* Цвета фона */
+    --color-bg: #FFFFFF;             /* Белый фон */
+    --color-bg-light: #F8F9FA;       /* Светлый фон */
+    --color-bg-muted: #E9ECEF;       /* Приглушенный фон */
+    
+    /* Цвета границ */
+    --color-border: #DEE2E6;         /* Основная граница */
+    --color-border-light: #E9ECEF;   /* Светлая граница */
+    
+    /* Цвета состояний */
+    --color-success: #28A745;        /* Успех */
+    --color-warning: #FFC107;        /* Предупреждение */
+    --color-danger: #DC3545;         /* Ошибка */
+    --color-info: #17A2B8;           /* Информация */
+    
+    /* Тени */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+    --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.20);
+    
+    /* Радиусы скругления */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+    
+    /* Шрифты */
+    --font-main: 'Montserrat', sans-serif;
+    --font-secondary: 'Inter', sans-serif;
+    --font-display: 'IBM Plex Sans', sans-serif;
+    
+    /* Размеры шрифтов */
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-md: 1rem;       /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 1.875rem;  /* 30px */
+    --font-size-4xl: 2.25rem;   /* 36px */
+    --font-size-5xl: 3rem;      /* 48px */
+    --font-size-6xl: 3.75rem;   /* 60px */
+    
+    /* Вес шрифтов */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Отступы */
+    --spacing-xs: 0.25rem;      /* 4px */
+    --spacing-sm: 0.5rem;       /* 8px */
+    --spacing-md: 1rem;         /* 16px */
+    --spacing-lg: 1.5rem;       /* 24px */
+    --spacing-xl: 2rem;         /* 32px */
+    --spacing-2xl: 3rem;        /* 48px */
+    --spacing-3xl: 4rem;        /* 64px */
+    --spacing-4xl: 6rem;        /* 96px */
+    --spacing-5xl: 8rem;        /* 128px */
+    
+    /* Границы */
+    --border-width: 1px;
+    --border-width-md: 2px;
+    --border-width-lg: 3px;
+    
+    /* Переходы */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Z-индексы */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+}
+
+/* Точка останова для мобильных устройств */
+@media (max-width: 576px) {
+    :root {
+        --font-size-sm: 0.8125rem;  /* 13px */
+        --font-size-md: 0.9375rem;  /* 15px */
+    }
+}
+
+/* Точка останова для планшетов */
+@media (max-width: 768px) {
+    :root {
+        --font-size-lg: 1.125rem;   /* 18px */
+    }
+}

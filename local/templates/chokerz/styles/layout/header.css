@@ -1,0 +1,213 @@
+/* ========================================
+   Шапка сайта (Header)
+   ======================================== */
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-sticky);
+    background-color: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-normal);
+}
+
+.header__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) 0;
+}
+
+/* Логотип */
+.header__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    transition: opacity var(--transition-fast);
+}
+
+.header__logo:hover {
+    opacity: 0.8;
+}
+
+.header__logo-img {
+    height: 40px;
+    width: auto;
+}
+
+.header__logo-text {
+    display: block;
+}
+
+/* Навигация */
+.nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.nav__link {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    transition: color var(--transition-fast);
+    position: relative;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+.nav__link:hover,
+.nav__link:focus {
+    color: var(--color-primary);
+}
+
+.nav__link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    height: 2px;
+    background-color: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--transition-normal);
+}
+
+.nav__link:hover::after,
+.nav__link:focus::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* Поиск */
+.search__form {
+    display: flex;
+    align-items: center;
+}
+
+.search__input {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    font-size: var(--font-size-md);
+    width: 240px;
+    transition: border-color var(--transition-fast);
+}
+
+.search__input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+}
+
+.search__btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    border: 1px solid var(--color-primary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.search__btn:hover {
+    background-color: var(--color-accent);
+}
+
+.search__icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Действия пользователя */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.actions__btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    color: var(--color-text);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.actions__btn:hover,
+.actions__btn:focus {
+    background-color: var(--color-bg-light);
+    color: var(--color-primary);
+}
+
+.actions__count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
+    background-color: var(--color-danger);
+    color: var(--color-bg);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-xs);
+}
+
+/* Мобильное меню */
+.burger {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: none;
+    cursor: pointer;
+    gap: 6px;
+}
+
+.burger__line {
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-text);
+    border-radius: var(--radius-full);
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+/* Точки останова */
+@media (max-width: 992px) {
+    .header__nav {
+        display: none;
+    }
+    
+    .header__search {
+        display: none;
+    }
+    
+    .burger {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .header__logo-img {
+        height: 36px;
+    }
+    
+    .header__logo-text {
+        font-size: var(--font-size-xl);
+    }
+}

@@ -1,0 +1,32 @@
+/* ========================================
+   CHOKERZ — амуниция для животных
+   Основной файл стилей
+   ======================================== */
+
+/* Импорты базовых стилей */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/base.css';
+@import 'base/typography.css';
+
+/* Импорты макета */
+@import 'layout/container.css';
+@import 'layout/grid.css';
+@import 'layout/header.css';
+@import 'layout/footer.css';
+
+/* Импорты блоков */
+@import 'blocks/button.css';
+@import 'blocks/form.css';
+@import 'blocks/card.css';
+@import 'blocks/nav.css';
+@import 'blocks/search.css';
+@import 'blocks/breadcrumbs.css';
+@import 'blocks/pagination.css';
+
+/* ========================================
+   Временный контент для демонстрации
+   ======================================== */
+
+/* Скрываем импорты, которых еще нет */
+/* Для быстрой проверки шаблона */
