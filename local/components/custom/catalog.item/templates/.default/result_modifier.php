@@ -1,3 +1,23 @@
+<?php
+/**
+ * result_modifier.php — catalog.item
+ *
+ * Финальная обработка $arResult перед передачей в template.php.
+ * Вся бизнес-логика подготовки данных — здесь, шаблон только выводит.
+ *
+ * Что делает:
+ *  - Форматирует цену (страховочный слой)
+ *  - Нормализует hex-код цвета (добавляет #, валидирует)
+ *  - Готовит флаги бейджей, наличия, маркетплейсов
+ *  - Готовит JSON офферов для JS (data-атрибут в template.php)
+ *  - Формирует JSON-LD (Schema.org Product) для SEO
+ *
+ * Путь: local/components/custom/catalog.item/templates/.default/result_modifier.php
+ *
+ * @package CHOKERZ
+ * @version 1.0
+ */
+
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
@@ -133,5 +153,3 @@ $arResult['JSON_LD'] = json_encode(
     $jsonLd,
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG
 );
-
-
