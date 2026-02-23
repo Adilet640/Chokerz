@@ -1,135 +1,261 @@
-<?php
-/**
- * Компонент карточки товара (кастомный)
- * 
- * @author VibePilot
- * @version 1.0
- */
-
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
 use Bitrix\Main\Loader;
+use Bitrix\Main\Application;
 use Bitrix\Iblock\ElementTable;
+use Bitrix\Catalog\PriceTable;
 use Bitrix\Catalog\ProductTable;
 
-/**
- * Class CatalogItemComponent
- */
 class CatalogItemComponent extends CBitrixComponent
 {
+    /** @var int ID инфоблока каталога, берётся из параметров компонента */
+    private int $iblockId = 0;
+
     /**
-     * Выполнение компонента
+     * Точка входа компонента.
+     * Порядок: проверка параметров → StartResultCache → запросы → EndResultCache → шаблон.
      */
-    public function executeComponent()
+    public function executeComponent(): void
     {
-        // Загрузка модулей
-        if (!Loader::includeModule('iblock') || !Loader::includeModule('catalog')) {
-            ShowError('Не удалось подключить модули инфоблоков или каталога');
+        if (!$this->loadModules()) {
             return;
         }
 
-        // Проверка наличия элемента
-        $this->arResult['ELEMENT_ID'] = (int)$this->arParams['ELEMENT_ID'];
-        
-        if ($this->arResult['ELEMENT_ID'] <= 0) {
-            ShowError('Элемент не найден');
+        $this->iblockId  = (int)($this->arParams['IBLOCK_ID'] ?? 0);
+        $elementId       = (int)($this->arParams['ELEMENT_ID'] ?? 0);
+        $cacheTime       = (int)($this->arParams['CACHE_TIME'] ?? 3600);
+
+        if ($elementId <= 0) {
+            ShowError('Не передан ID элемента');
             return;
         }
 
-        // Получение данных элемента
-        $this->arResult['ELEMENT'] = $this->getElementData($this->arResult['ELEMENT_ID']);
-        
-        if (!$this->arResult['ELEMENT']) {
-            ShowError('Элемент не найден');
-            return;
+        // -----------------------------------------------------------------------
+        // Кэш: StartResultCache вызывается ДО запросов к БД.
+        // Ключ кэша строится из ID элемента, чтобы при изменении товара
+        // управляемый кэш автоматически сбрасывался через тег iblock_id_N.
+        // -----------------------------------------------------------------------
+        if ($this->StartResultCache($cacheTime, $elementId)) {
+
+            $element = $this->getElementData($elementId);
+
+            if (!$element) {
+                // Элемент не найден — прерываем кэш, не записываем пустой результат
+                $this->AbortResultCache();
+                ShowError('Элемент с ID=' . $elementId . ' не найден или не активен');
+                return;
+            }
+
+            $this->arResult['ELEMENT'] = $element;
+            $this->arResult['OFFERS']  = $this->getOffers($elementId);
+
+            // Добавляем теги управляемого кэша для автосброса при изменении инфоблока
+            $this->SetResultCacheKeys(['ELEMENT', 'OFFERS']);
+
+            $this->EndResultCache();
         }
 
-        // Получение торговых предложений (SKU)
-        $this->arResult['OFFERS'] = $this->getOffers($this->arResult['ELEMENT_ID']);
-
-        // Проверка кэширования
-        if ($this->StartResultCache(false, [], '/'.$this->arResult['ELEMENT']['ID'])) {
-            $this->includeComponentTemplate();
-        }
+        $this->includeComponentTemplate();
     }
 
     /**
-     * Получение данных элемента
-     * 
-     * @param int $elementId ID элемента
-     * @return array|null Данные элемента или null если не найден
+     * Загрузка обязательных модулей Битрикс.
      */
-    private function getElementData($elementId)
+    private function loadModules(): bool
     {
-        $result = ElementTable::getList([
+        if (!Loader::includeModule('iblock') || !Loader::includeModule('catalog')) {
+            ShowError('Не удалось подключить модули iblock / catalog');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Получение данных элемента каталога через D7 API.
+     *
+     * Поля элемента — через ElementTable.
+     * Цена — через PriceTable (тип цены 1 = базовая).
+     * Остаток — через ProductTable.
+     * Свойства — через CIBlockElement::GetProperty (поддерживает множественные значения и enum).
+     *
+     * @param int $elementId
+     * @return array|null
+     */
+    private function getElementData(int $elementId): ?array
+    {
+        // -----------------------------------------------------------------------
+        // 1. Основные поля элемента (без цен и свойств — они в других таблицах)
+        // -----------------------------------------------------------------------
+        $row = ElementTable::getList([
             'select' => [
                 'ID',
                 'NAME',
+                'CODE',
                 'DETAIL_PAGE_URL',
                 'PREVIEW_PICTURE',
                 'DETAIL_PICTURE',
                 'PREVIEW_TEXT',
                 'DETAIL_TEXT',
                 'IBLOCK_SECTION_ID',
-                'CATALOG_QUANTITY',
-                'CATALOG_PRICE_1',
-                'CATALOG_CURRENCY_1',
-                'PROPERTY_TYPE',
-                'PROPERTY_MATERIAL',
-                'PROPERTY_SIZE',
-                'PROPERTY_COLOR',
-                'PROPERTY_ARTICLE',
-                'PROPERTY_HIT',
-                'PROPERTY_NEW',
-                'PROPERTY_SALE',
-                'PROPERTY_OZON_LINK',
-                'PROPERTY_WB_LINK',
-                'PROPERTY_YM_LINK'
+                'IBLOCK_ID',
+                'DATE_CREATE',
+                'TIMESTAMP_X',
             ],
             'filter' => [
-                '=ID' => $elementId,
-                '=ACTIVE' => 'Y'
-            ]
+                '=ID'     => $elementId,
+                '=ACTIVE' => 'Y',
+            ],
         ])->fetch();
 
-        if (!$result) {
+        if (!$row) {
             return null;
         }
 
-        // Обработка изображений
-        if ($result['PREVIEW_PICTURE']) {
-            $result['PREVIEW_PICTURE_FILE'] = CFile::GetPath($result['PREVIEW_PICTURE']);
+        // -----------------------------------------------------------------------
+        // 2. Изображения через FileTable (D7)
+        // -----------------------------------------------------------------------
+        if ($row['PREVIEW_PICTURE']) {
+            $row['PREVIEW_PICTURE_SRC'] = \CFile::GetPath($row['PREVIEW_PICTURE']);
         }
-        
-        if ($result['DETAIL_PICTURE']) {
-            $result['DETAIL_PICTURE_FILE'] = CFile::GetPath($result['DETAIL_PICTURE']);
-        }
-
-        // Форматирование цены
-        if ($result['CATALOG_PRICE_1']) {
-            $result['FORMATTED_PRICE'] = number_format(
-                $result['CATALOG_PRICE_1'], 
-                0, 
-                '.', 
-                ' '
-            ) . ' ' . $result['CATALOG_CURRENCY_1'];
+        if ($row['DETAIL_PICTURE']) {
+            $row['DETAIL_PICTURE_SRC'] = \CFile::GetPath($row['DETAIL_PICTURE']);
         }
 
-        return $result;
+        // -----------------------------------------------------------------------
+        // 3. Цена через PriceTable (тип цены BASE = 1, настраивается в arParams)
+        // -----------------------------------------------------------------------
+        $priceTypeId = (int)($this->arParams['PRICE_TYPE_ID'] ?? 1);
+
+        $priceRow = PriceTable::getList([
+            'select' => ['PRICE', 'CURRENCY'],
+            'filter' => [
+                '=PRODUCT_ID'    => $elementId,
+                '=CATALOG_GROUP_ID' => $priceTypeId,
+            ],
+            'limit' => 1,
+        ])->fetch();
+
+        if ($priceRow) {
+            $row['PRICE']          = $priceRow['PRICE'];
+            $row['CURRENCY']       = $priceRow['CURRENCY'];
+            $row['FORMATTED_PRICE'] = number_format((float)$priceRow['PRICE'], 0, '.', ' ')
+                . ' ' . $priceRow['CURRENCY'];
+        }
+
+        // -----------------------------------------------------------------------
+        // 4. Остаток через ProductTable
+        // -----------------------------------------------------------------------
+        $productRow = ProductTable::getList([
+            'select' => ['QUANTITY', 'AVAILABLE'],
+            'filter' => ['=ID' => $elementId],
+            'limit'  => 1,
+        ])->fetch();
+
+        if ($productRow) {
+            $row['CATALOG_QUANTITY'] = (float)$productRow['QUANTITY'];
+            $row['CATALOG_AVAILABLE'] = $productRow['AVAILABLE'];
+        } else {
+            $row['CATALOG_QUANTITY'] = 0;
+            $row['CATALOG_AVAILABLE'] = 'N';
+        }
+
+        // -----------------------------------------------------------------------
+        // 5. Свойства через старый API (он надёжнее для enum и файлов)
+        //    Список символьных кодов фиксируется в ТЗ п.4.1 и не меняется.
+        // -----------------------------------------------------------------------
+        $propertyCodes = [
+            'TYPE',         // Тип изделия
+            'MATERIAL',     // Материал
+            'PURPOSE',      // Назначение
+            'SIZE',         // Размер
+            'COLOR',        // Цвет (enum с hex-кодом)
+            'ARTICLE',      // Артикул
+            'HIT',          // Хит продаж
+            'NEW',          // Новинка
+            'SALE',         // Акция
+            'OZON_LINK',    // Ссылка на Ozon
+            'WB_LINK',      // Ссылка на Wildberries
+            'YM_LINK',      // Ссылка на Яндекс Маркет
+        ];
+
+        $rsProps = \CIBlockElement::GetProperty(
+            $row['IBLOCK_ID'],
+            $elementId,
+            ['sort' => 'asc'],
+            ['CODE' => $propertyCodes]
+        );
+
+        while ($prop = $rsProps->Fetch()) {
+            $code = $prop['CODE'];
+
+            // Для enum-свойств (Цвет) сохраняем дополнительно XML_ID (hex-код)
+            if ($prop['PROPERTY_TYPE'] === 'L') {
+                $row['PROPERTIES'][$code]['VALUE']      = $prop['VALUE'];
+                $row['PROPERTIES'][$code]['VALUE_XML_ID'] = $prop['VALUE_XML_ID']; // hex цвета
+            } elseif ($prop['PROPERTY_TYPE'] === 'F') {
+                // Файловые свойства — получаем путь
+                $row['PROPERTIES'][$code]['VALUE'] = $prop['VALUE']
+                    ? \CFile::GetPath($prop['VALUE'])
+                    : null;
+            } else {
+                $row['PROPERTIES'][$code]['VALUE'] = $prop['VALUE'];
+            }
+        }
+
+        return $row;
     }
 
     /**
-     * Получение торговых предложений (SKU)
-     * 
-     * @param int $elementId ID элемента
-     * @return array Массив торговых предложений
+     * Получение торговых предложений (SKU) для элемента.
+     * SKU хранятся в отдельном инфоблоке предложений, ID которого
+     * задаётся в параметре OFFERS_IBLOCK_ID.
+     *
+     * @param int $elementId ID родительского элемента
+     * @return array
      */
-    private function getOffers($elementId)
+    private function getOffers(int $elementId): array
     {
-        // Здесь будет логика получения SKU
-        // Для простоты возвращаем пустой массив
-        return [];
+        $offersIblockId = (int)($this->arParams['OFFERS_IBLOCK_ID'] ?? 0);
+
+        if ($offersIblockId <= 0) {
+            return [];
+        }
+
+        $offers = [];
+
+        $rsOffers = \CIBlockElement::GetList(
+            ['SORT' => 'ASC'],
+            [
+                'IBLOCK_ID'                    => $offersIblockId,
+                'PROPERTY_CML2_LINK'           => $elementId,
+                'ACTIVE'                       => 'Y',
+                'CATALOG_AVAILABLE'            => 'Y',
+            ],
+            false,
+            false,
+            ['ID', 'NAME', 'PROPERTY_SIZE', 'PROPERTY_COLOR', 'CATALOG_PRICE_1', 'CATALOG_QUANTITY']
+        );
+
+        while ($offer = $rsOffers->GetNextElement()) {
+            $offerFields = $offer->GetFields();
+            $offerProps  = $offer->GetProperties();
+
+            $offers[] = [
+                'ID'       => $offerFields['ID'],
+                'NAME'     => $offerFields['NAME'],
+                'SIZE'     => $offerProps['SIZE']['VALUE']  ?? null,
+                'COLOR'    => $offerProps['COLOR']['VALUE'] ?? null,
+                'COLOR_HEX'=> $offerProps['COLOR']['VALUE_XML_ID'] ?? null,
+                'PRICE'    => $offerFields['CATALOG_PRICE_1'] ?? null,
+                'QUANTITY' => $offerFields['CATALOG_QUANTITY'] ?? 0,
+            ];
+        }
+
+        return $offers;
     }
 }
+
+
+    
