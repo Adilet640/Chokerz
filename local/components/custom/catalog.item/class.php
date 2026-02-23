@@ -3,7 +3,6 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
 }
 
 use Bitrix\Main\Loader;
-use Bitrix\Main\Application;
 use Bitrix\Iblock\ElementTable;
 use Bitrix\Catalog\PriceTable;
 use Bitrix\Catalog\ProductTable;
@@ -23,9 +22,9 @@ class CatalogItemComponent extends CBitrixComponent
             return;
         }
 
-        $this->iblockId  = (int)($this->arParams['IBLOCK_ID'] ?? 0);
-        $elementId       = (int)($this->arParams['ELEMENT_ID'] ?? 0);
-        $cacheTime       = (int)($this->arParams['CACHE_TIME'] ?? 3600);
+        $this->iblockId = (int)($this->arParams['IBLOCK_ID'] ?? 0);
+        $elementId      = (int)($this->arParams['ELEMENT_ID'] ?? 0);
+        $cacheTime      = (int)($this->arParams['CACHE_TIME'] ?? 3600);
 
         if ($elementId <= 0) {
             ShowError('Не передан ID элемента');
@@ -42,7 +41,6 @@ class CatalogItemComponent extends CBitrixComponent
             $element = $this->getElementData($elementId);
 
             if (!$element) {
-                // Элемент не найден — прерываем кэш, не записываем пустой результат
                 $this->AbortResultCache();
                 ShowError('Элемент с ID=' . $elementId . ' не найден или не активен');
                 return;
@@ -51,7 +49,6 @@ class CatalogItemComponent extends CBitrixComponent
             $this->arResult['ELEMENT'] = $element;
             $this->arResult['OFFERS']  = $this->getOffers($elementId);
 
-            // Добавляем теги управляемого кэша для автосброса при изменении инфоблока
             $this->SetResultCacheKeys(['ELEMENT', 'OFFERS']);
 
             $this->EndResultCache();
@@ -75,19 +72,17 @@ class CatalogItemComponent extends CBitrixComponent
     /**
      * Получение данных элемента каталога через D7 API.
      *
-     * Поля элемента — через ElementTable.
-     * Цена — через PriceTable (тип цены 1 = базовая).
-     * Остаток — через ProductTable.
-     * Свойства — через CIBlockElement::GetProperty (поддерживает множественные значения и enum).
+     * Поля элемента  — через ElementTable.
+     * Цена           — через PriceTable (тип цены 1 = базовая).
+     * Остаток        — через ProductTable.
+     * Свойства       — через CIBlockElement::GetProperty.
      *
      * @param int $elementId
      * @return array|null
      */
     private function getElementData(int $elementId): ?array
     {
-        // -----------------------------------------------------------------------
-        // 1. Основные поля элемента (без цен и свойств — они в других таблицах)
-        // -----------------------------------------------------------------------
+        // 1. Основные поля элемента
         $row = ElementTable::getList([
             'select' => [
                 'ID',
@@ -100,8 +95,6 @@ class CatalogItemComponent extends CBitrixComponent
                 'DETAIL_TEXT',
                 'IBLOCK_SECTION_ID',
                 'IBLOCK_ID',
-                'DATE_CREATE',
-                'TIMESTAMP_X',
             ],
             'filter' => [
                 '=ID'     => $elementId,
@@ -113,9 +106,7 @@ class CatalogItemComponent extends CBitrixComponent
             return null;
         }
 
-        // -----------------------------------------------------------------------
-        // 2. Изображения через FileTable (D7)
-        // -----------------------------------------------------------------------
+        // 2. Изображения
         if ($row['PREVIEW_PICTURE']) {
             $row['PREVIEW_PICTURE_SRC'] = \CFile::GetPath($row['PREVIEW_PICTURE']);
         }
@@ -123,30 +114,26 @@ class CatalogItemComponent extends CBitrixComponent
             $row['DETAIL_PICTURE_SRC'] = \CFile::GetPath($row['DETAIL_PICTURE']);
         }
 
-        // -----------------------------------------------------------------------
-        // 3. Цена через PriceTable (тип цены BASE = 1, настраивается в arParams)
-        // -----------------------------------------------------------------------
+        // 3. Цена через PriceTable
         $priceTypeId = (int)($this->arParams['PRICE_TYPE_ID'] ?? 1);
 
         $priceRow = PriceTable::getList([
             'select' => ['PRICE', 'CURRENCY'],
             'filter' => [
-                '=PRODUCT_ID'    => $elementId,
+                '=PRODUCT_ID'       => $elementId,
                 '=CATALOG_GROUP_ID' => $priceTypeId,
             ],
             'limit' => 1,
         ])->fetch();
 
         if ($priceRow) {
-            $row['PRICE']          = $priceRow['PRICE'];
-            $row['CURRENCY']       = $priceRow['CURRENCY'];
+            $row['PRICE']           = $priceRow['PRICE'];
+            $row['CURRENCY']        = $priceRow['CURRENCY'];
             $row['FORMATTED_PRICE'] = number_format((float)$priceRow['PRICE'], 0, '.', ' ')
                 . ' ' . $priceRow['CURRENCY'];
         }
 
-        // -----------------------------------------------------------------------
         // 4. Остаток через ProductTable
-        // -----------------------------------------------------------------------
         $productRow = ProductTable::getList([
             'select' => ['QUANTITY', 'AVAILABLE'],
             'filter' => ['=ID' => $elementId],
@@ -154,30 +141,27 @@ class CatalogItemComponent extends CBitrixComponent
         ])->fetch();
 
         if ($productRow) {
-            $row['CATALOG_QUANTITY'] = (float)$productRow['QUANTITY'];
+            $row['CATALOG_QUANTITY']  = (float)$productRow['QUANTITY'];
             $row['CATALOG_AVAILABLE'] = $productRow['AVAILABLE'];
         } else {
-            $row['CATALOG_QUANTITY'] = 0;
+            $row['CATALOG_QUANTITY']  = 0;
             $row['CATALOG_AVAILABLE'] = 'N';
         }
 
-        // -----------------------------------------------------------------------
-        // 5. Свойства через старый API (он надёжнее для enum и файлов)
-        //    Список символьных кодов фиксируется в ТЗ п.4.1 и не меняется.
-        // -----------------------------------------------------------------------
+        // 5. Свойства через CIBlockElement::GetProperty
         $propertyCodes = [
-            'TYPE',         // Тип изделия
-            'MATERIAL',     // Материал
-            'PURPOSE',      // Назначение
-            'SIZE',         // Размер
-            'COLOR',        // Цвет (enum с hex-кодом)
-            'ARTICLE',      // Артикул
-            'HIT',          // Хит продаж
-            'NEW',          // Новинка
-            'SALE',         // Акция
-            'OZON_LINK',    // Ссылка на Ozon
-            'WB_LINK',      // Ссылка на Wildberries
-            'YM_LINK',      // Ссылка на Яндекс Маркет
+            'TYPE',
+            'MATERIAL',
+            'PURPOSE',
+            'SIZE',
+            'COLOR',
+            'ARTICLE',
+            'HIT',
+            'NEW',
+            'SALE',
+            'OZON_LINK',
+            'WB_LINK',
+            'YM_LINK',
         ];
 
         $rsProps = \CIBlockElement::GetProperty(
@@ -190,12 +174,10 @@ class CatalogItemComponent extends CBitrixComponent
         while ($prop = $rsProps->Fetch()) {
             $code = $prop['CODE'];
 
-            // Для enum-свойств (Цвет) сохраняем дополнительно XML_ID (hex-код)
             if ($prop['PROPERTY_TYPE'] === 'L') {
-                $row['PROPERTIES'][$code]['VALUE']      = $prop['VALUE'];
-                $row['PROPERTIES'][$code]['VALUE_XML_ID'] = $prop['VALUE_XML_ID']; // hex цвета
+                $row['PROPERTIES'][$code]['VALUE']        = $prop['VALUE'];
+                $row['PROPERTIES'][$code]['VALUE_XML_ID'] = $prop['VALUE_XML_ID'];
             } elseif ($prop['PROPERTY_TYPE'] === 'F') {
-                // Файловые свойства — получаем путь
                 $row['PROPERTIES'][$code]['VALUE'] = $prop['VALUE']
                     ? \CFile::GetPath($prop['VALUE'])
                     : null;
@@ -208,9 +190,7 @@ class CatalogItemComponent extends CBitrixComponent
     }
 
     /**
-     * Получение торговых предложений (SKU) для элемента.
-     * SKU хранятся в отдельном инфоблоке предложений, ID которого
-     * задаётся в параметре OFFERS_IBLOCK_ID.
+     * Получение торговых предложений (SKU).
      *
      * @param int $elementId ID родительского элемента
      * @return array
@@ -228,10 +208,10 @@ class CatalogItemComponent extends CBitrixComponent
         $rsOffers = \CIBlockElement::GetList(
             ['SORT' => 'ASC'],
             [
-                'IBLOCK_ID'                    => $offersIblockId,
-                'PROPERTY_CML2_LINK'           => $elementId,
-                'ACTIVE'                       => 'Y',
-                'CATALOG_AVAILABLE'            => 'Y',
+                'IBLOCK_ID'          => $offersIblockId,
+                'PROPERTY_CML2_LINK' => $elementId,
+                'ACTIVE'             => 'Y',
+                'CATALOG_AVAILABLE'  => 'Y',
             ],
             false,
             false,
@@ -243,13 +223,13 @@ class CatalogItemComponent extends CBitrixComponent
             $offerProps  = $offer->GetProperties();
 
             $offers[] = [
-                'ID'       => $offerFields['ID'],
-                'NAME'     => $offerFields['NAME'],
-                'SIZE'     => $offerProps['SIZE']['VALUE']  ?? null,
-                'COLOR'    => $offerProps['COLOR']['VALUE'] ?? null,
-                'COLOR_HEX'=> $offerProps['COLOR']['VALUE_XML_ID'] ?? null,
-                'PRICE'    => $offerFields['CATALOG_PRICE_1'] ?? null,
-                'QUANTITY' => $offerFields['CATALOG_QUANTITY'] ?? 0,
+                'ID'        => $offerFields['ID'],
+                'NAME'      => $offerFields['NAME'],
+                'SIZE'      => $offerProps['SIZE']['VALUE']          ?? null,
+                'COLOR'     => $offerProps['COLOR']['VALUE']         ?? null,
+                'COLOR_HEX' => $offerProps['COLOR']['VALUE_XML_ID']  ?? null,
+                'PRICE'     => $offerFields['CATALOG_PRICE_1']       ?? null,
+                'QUANTITY'  => $offerFields['CATALOG_QUANTITY']      ?? 0,
             ];
         }
 
@@ -258,4 +238,4 @@ class CatalogItemComponent extends CBitrixComponent
 }
 
 
-    
+
