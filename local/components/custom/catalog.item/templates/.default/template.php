@@ -1,3 +1,18 @@
+<?php
+/**
+ * Шаблон компонента карточки товара CHOKERZ
+ *
+ * Изменения (2026-02-23):
+ *  - Удалён inline-скрипт <script> (нарушение ТЗ п.6.1) → перенесён в component_epilog.php
+ *  - Удалён вызов $this->getColorHex() → цвет берётся из $props['COLOR']['HEX'] (result_modifier)
+ *  - Флаги бейджей и наличия берутся из $arResult (подготовлены в result_modifier.php)
+ *  - OFFERS_JSON передаётся через data-атрибут для JS
+ *
+ * Путь: local/components/custom/catalog.item/templates/.default/template.php
+ *
+ * @package CHOKERZ
+ * @version 1.1
+ */
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
