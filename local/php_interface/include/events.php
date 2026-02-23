@@ -1,40 +1,45 @@
+<?php
+/**
+ * events.php — обработчики событий CHOKERZ
+ *
+ * Изменения (2026-02-23):
+ *  - Удалено несуществующее событие 'OnBeforeIBlockElementShow'
+ *  - Добавлен return в onBeforeMailSend (без него изменения $arFields теряются)
+ *  - Обработчики переведены в класс ChokerzEventHandlers (нет конфликтов глобальных имён)
+ *  - Добавлен обработчик сброса управляемого кэша при изменении элемента инфоблока
+ *
+ * Путь: local/php_interface/include/events.php
+ *
+ * @package CHOKERZ
+ * @version 1.1
+ */
+
 use Bitrix\Main\EventManager;
 
 $eventManager = EventManager::getInstance();
 
-/**
- * Событие: после сохранения заказа
- * Логируем создание заказа, можно добавить Telegram-уведомление.
- */
+// После сохранения заказа
 $eventManager->addEventHandler(
     'sale',
     'OnSaleOrderSaved',
     [ChokerzEventHandlers::class, 'onOrderSaved']
 );
 
-/**
- * Событие: после регистрации пользователя
- */
+// После регистрации пользователя
 $eventManager->addEventHandler(
     'main',
     'OnAfterUserRegister',
     [ChokerzEventHandlers::class, 'onUserRegister']
 );
 
-/**
- * Событие: перед отправкой почтового события
- * ВАЖНО: обработчик должен возвращать $arFields, иначе изменения теряются.
- */
+// Перед отправкой почтового события
 $eventManager->addEventHandler(
     'main',
     'OnBeforeEventSend',
     [ChokerzEventHandlers::class, 'onBeforeMailSend']
 );
 
-/**
- * Событие: изменение элемента инфоблока — сброс управляемого кэша
- * Это ключевой обработчик для актуальности карточек товаров.
- */
+// Сброс кэша при изменении элемента инфоблока
 $eventManager->addEventHandler(
     'iblock',
     'OnAfterIBlockElementUpdate',
@@ -68,7 +73,7 @@ class ChokerzEventHandlers
             'DESCRIPTION'   => 'Заказ #' . $order->getId() . ' создан',
         ]);
 
-        // TODO: здесь добавить отправку Telegram-уведомления через webhook (ТЗ п.7.3)
+        // TODO: Telegram-уведомление через webhook (ТЗ п.7.3)
     }
 
     /**
@@ -83,7 +88,7 @@ class ChokerzEventHandlers
             'AUDIT_TYPE_ID' => 'CHOKERZ_USER_REGISTER',
             'MODULE_ID'     => 'main',
             'ITEM_ID'       => $arFields['ID'] ?? 0,
-            'DESCRIPTION'   => 'Зарегистрирован пользователь: ' . ($arFields['EMAIL'] ?? ''),
+            'DESCRIPTION'   => 'Зарегистрирован: ' . ($arFields['EMAIL'] ?? ''),
         ]);
     }
 
@@ -104,7 +109,7 @@ class ChokerzEventHandlers
      * Сброс управляемого кэша при изменении элемента инфоблока.
      * Обеспечивает актуальность данных карточки товара без ручного сброса.
      *
-     * @param array $arFields Поля элемента
+     * @param array $arFields
      */
     public static function onIBlockElementUpdate(array $arFields): void
     {
@@ -112,7 +117,6 @@ class ChokerzEventHandlers
             return;
         }
 
-        // Сброс кэша конкретного элемента по тегу
         \CBitrixComponent::clearComponentCache('custom:catalog.item', '/');
     }
 }
