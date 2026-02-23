@@ -1,44 +1,43 @@
+
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
-$element = $arResult['ELEMENT'];
-$offers  = $arResult['OFFERS'];
+$element     = $arResult['ELEMENT'];
+$offers      = $arResult['OFFERS'];
+$offersJson  = $arResult['OFFERS_JSON'] ?? '[]';
 
-// Вспомогательные переменные — подготовка данных в шаблоне минимальна,
-// основная обработка — в result_modifier.php
 $productId   = (int)$element['ID'];
 $productName = htmlspecialchars($element['NAME'], ENT_QUOTES, 'UTF-8');
 $detailUrl   = htmlspecialchars($element['DETAIL_PAGE_URL'] ?? '#', ENT_QUOTES, 'UTF-8');
-$isAvailable = ($element['CATALOG_AVAILABLE'] === 'Y' && $element['CATALOG_QUANTITY'] > 0);
-
+$isAvailable = $element['IS_AVAILABLE'];      // подготовлено в result_modifier.php
+$badges      = $element['BADGES'];            // подготовлено в result_modifier.php
 $props       = $element['PROPERTIES'] ?? [];
-$colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-значения
+$colorHex    = $props['COLOR']['HEX'] ?? '';  // нормализован в result_modifier.php
 ?>
 
 <article
     class="product-card"
     data-product-id="<?= $productId ?>"
     data-available="<?= $isAvailable ? 'true' : 'false' ?>"
+    data-offers="<?= $offersJson ?>"
 >
-    <?php /* Бейджи — только если свойство явно = 'Y' */ ?>
-    <?php if (!empty($props['HIT']['VALUE']) || !empty($props['NEW']['VALUE']) || !empty($props['SALE']['VALUE'])): ?>
+    <?php if ($element['HAS_BADGES']): ?>
     <div class="product-card__badges" aria-label="Метки товара">
-        <?php if (!empty($props['HIT']['VALUE'])): ?>
+        <?php if ($badges['HIT']): ?>
             <span class="product-card__badge product-card__badge--hit">Хит</span>
         <?php endif; ?>
-        <?php if (!empty($props['NEW']['VALUE'])): ?>
+        <?php if ($badges['NEW']): ?>
             <span class="product-card__badge product-card__badge--new">Новинка</span>
         <?php endif; ?>
-        <?php if (!empty($props['SALE']['VALUE'])): ?>
+        <?php if ($badges['SALE']): ?>
             <span class="product-card__badge product-card__badge--sale">Акция</span>
         <?php endif; ?>
     </div>
     <?php endif; ?>
 
-    <?php /* Изображение */ ?>
     <div class="product-card__image-wrapper">
-        <a href="<?= $detailUrl ?>" class="product-card__image-link" tabindex="0">
+        <a href="<?= $detailUrl ?>" class="product-card__image-link">
             <?php if (!empty($element['PREVIEW_PICTURE_SRC'])): ?>
                 <img
                     src="<?= htmlspecialchars($element['PREVIEW_PICTURE_SRC'], ENT_QUOTES, 'UTF-8') ?>"
@@ -59,7 +58,6 @@ $colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-
             <?php endif; ?>
         </a>
 
-        <?php /* Кнопки-действия */ ?>
         <div class="product-card__actions" role="group" aria-label="Действия с товаром">
             <button
                 class="product-card__action-btn"
@@ -89,7 +87,6 @@ $colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-
         </div>
     </div>
 
-    <?php /* Информация о товаре */ ?>
     <div class="product-card__info">
         <h3 class="product-card__title">
             <a href="<?= $detailUrl ?>"><?= $productName ?></a>
@@ -114,20 +111,16 @@ $colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-
             <?php endif; ?>
         </div>
 
-        <?php /* Цвет: hex берётся из XML_ID enum-значения (без inline style).
-                  JS в component_epilog.php применяет CSS custom property --color-swatch */ ?>
         <?php if (!empty($props['COLOR']['VALUE'])): ?>
         <div class="product-card__colors" aria-label="Цвет: <?= htmlspecialchars($props['COLOR']['VALUE'], ENT_QUOTES, 'UTF-8') ?>">
             <span
                 class="product-card__color-swatch"
-                data-color="<?= htmlspecialchars($colorHex ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                data-color="<?= htmlspecialchars($colorHex, ENT_QUOTES, 'UTF-8') ?>"
                 title="<?= htmlspecialchars($props['COLOR']['VALUE'], ENT_QUOTES, 'UTF-8') ?>"
-                aria-label="<?= htmlspecialchars($props['COLOR']['VALUE'], ENT_QUOTES, 'UTF-8') ?>"
             ></span>
         </div>
         <?php endif; ?>
 
-        <?php /* Варианты SKU (размеры) */ ?>
         <?php if (!empty($offers)): ?>
         <div class="product-card__offers" role="group" aria-label="Размеры">
             <?php foreach ($offers as $offer): ?>
@@ -136,7 +129,7 @@ $colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-
                     class="product-card__size-btn"
                     data-offer-id="<?= (int)$offer['ID'] ?>"
                     data-size="<?= htmlspecialchars($offer['SIZE'], ENT_QUOTES, 'UTF-8') ?>"
-                    <?= $offer['QUANTITY'] <= 0 ? 'disabled aria-disabled="true"' : '' ?>
+                    <?= !$offer['IS_AVAILABLE'] ? 'disabled aria-disabled="true"' : '' ?>
                 >
                     <?= htmlspecialchars($offer['SIZE'], ENT_QUOTES, 'UTF-8') ?>
                 </button>
@@ -160,9 +153,7 @@ $colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-
                 data-action="add-to-cart"
                 data-product-id="<?= $productId ?>"
                 data-product-name="<?= $productName ?>"
-                <?php if (!empty($element['PRICE'])): ?>
-                data-product-price="<?= (float)$element['PRICE'] ?>"
-                <?php endif; ?>
+                data-product-price="<?= (float)($element['PRICE'] ?? 0) ?>"
                 aria-label="Добавить «<?= $productName ?>» в корзину"
             >
                 В корзину
@@ -174,36 +165,25 @@ $colorHex    = $props['COLOR']['VALUE_XML_ID'] ?? null; // hex из XML_ID enum-
             <?php endif; ?>
         </div>
 
-        <?php /* Кнопки маркетплейсов — только если ссылка заполнена */ ?>
-        <?php
-        $marketplaces = [
-            'OZON_LINK' => ['label' => 'Купить на Ozon',          'class' => 'ozon'],
-            'WB_LINK'   => ['label' => 'Купить на Wildberries',   'class' => 'wb'],
-            'YM_LINK'   => ['label' => 'Купить на Яндекс Маркет', 'class' => 'ym'],
-        ];
-
-        $hasMarketplace = false;
-        foreach ($marketplaces as $propCode => $mp) {
-            if (!empty($props[$propCode]['VALUE'])) {
-                $hasMarketplace = true;
-                break;
-            }
-        }
-        ?>
-
-        <?php if ($hasMarketplace): ?>
+        <?php if ($element['HAS_MARKETPLACE_LINKS']): ?>
         <div class="product-card__marketplaces">
-            <?php foreach ($marketplaces as $propCode => $mp): ?>
-                <?php if (!empty($props[$propCode]['VALUE'])): ?>
+            <?php
+            $marketplaces = [
+                'OZON_LINK' => ['label' => 'Купить на Ozon',           'mod' => 'ozon'],
+                'WB_LINK'   => ['label' => 'Купить на Wildberries',    'mod' => 'wb'],
+                'YM_LINK'   => ['label' => 'Купить на Яндекс Маркет', 'mod' => 'ym'],
+            ];
+            foreach ($marketplaces as $code => $mp):
+                if (empty($props[$code]['VALUE'])) continue;
+            ?>
                 <a
-                    href="<?= htmlspecialchars($props[$propCode]['VALUE'], ENT_QUOTES, 'UTF-8') ?>"
+                    href="<?= htmlspecialchars($props[$code]['VALUE'], ENT_QUOTES, 'UTF-8') ?>"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="product-card__marketplace-link product-card__marketplace-link--<?= $mp['class'] ?>"
+                    class="product-card__marketplace-link product-card__marketplace-link--<?= $mp['mod'] ?>"
                 >
                     <?= $mp['label'] ?>
                 </a>
-                <?php endif; ?>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
