@@ -1,69 +1,16 @@
-<?php
-/**
- * Обработчики событий проекта CHOKERZ
- */
-
 use Bitrix\Main\EventManager;
 
 $eventManager = EventManager::getInstance();
 
 /**
- * Событие: перед добавлением элемента в корзину
- */
-$eventManager->addEventHandler(
-    'sale',
-    'OnBeforeBasketAdd',
-    'onBeforeBasketAddHandler'
-);
-
-function onBeforeBasketAddHandler($basketCode, $productId, $quantity) {
-    // Можно добавить логику проверки товара перед добавлением в корзину
-    // Например, проверка наличия, ограничение количества и т.д.
-    
-    // Вернуть true для разрешения добавления
-    return true;
-}
-
-/**
- * Событие: после добавления заказа
+ * Событие: после сохранения заказа
+ * Логируем создание заказа, можно добавить Telegram-уведомление.
  */
 $eventManager->addEventHandler(
     'sale',
     'OnSaleOrderSaved',
-    'onSaleOrderSavedHandler'
+    [ChokerzEventHandlers::class, 'onOrderSaved']
 );
-
-function onSaleOrderSavedHandler($order) {
-    // Логика после сохранения заказа
-    // Например, отправка уведомлений, обновление статистики и т.д.
-    
-    // Логирование заказа
-    \CEventLog::Add(array(
-        'SEVERITY' => 'INFO',
-        'AUDIT_TYPE_ID' => 'ORDER_CREATED',
-        'MODULE_ID' => 'sale',
-        'ITEM_ID' => $order->getId(),
-        'DESCRIPTION' => 'Заказ #' . $order->getId() . ' успешно создан'
-    ));
-    
-    // Здесь можно добавить отправку уведомления в Telegram
-    // или другие действия
-}
-
-/**
- * Событие: перед выводом элемента каталога
- */
-$eventManager->addEventHandler(
-    'iblock',
-    'OnBeforeIBlockElementShow',
-    'onBeforeIBlockElementShowHandler'
-);
-
-function onBeforeIBlockElementShowHandler($elementId, $iblockId) {
-    // Можно добавить логику перед выводом элемента
-    // Например, увеличение счётчика просмотров
-    return $elementId;
-}
 
 /**
  * Событие: после регистрации пользователя
@@ -71,53 +18,101 @@ function onBeforeIBlockElementShowHandler($elementId, $iblockId) {
 $eventManager->addEventHandler(
     'main',
     'OnAfterUserRegister',
-    'onAfterUserRegisterHandler'
+    [ChokerzEventHandlers::class, 'onUserRegister']
 );
-
-function onAfterUserRegisterHandler($arFields) {
-    // Логика после регистрации пользователя
-    // Например, отправка приветственного письма
-    
-    // Логирование
-    \CEventLog::Add(array(
-        'SEVERITY' => 'INFO',
-        'AUDIT_TYPE_ID' => 'USER_REGISTERED',
-        'MODULE_ID' => 'main',
-        'ITEM_ID' => $arFields['ID'],
-        'DESCRIPTION' => 'Пользователь ' . $arFields['EMAIL'] . ' успешно зарегистрирован'
-    ));
-}
-
-/**
- * Событие: изменение цены товара
- */
-$eventManager->addEventHandler(
-    'catalog',
-    'OnBeforePriceUpdate',
-    'onBeforePriceUpdateHandler'
-);
-
-function onBeforePriceUpdateHandler($priceId, $fields) {
-    // Можно добавить логику перед обновлением цены
-    // Например, проверка корректности цены
-    return true;
-}
 
 /**
  * Событие: перед отправкой почтового события
+ * ВАЖНО: обработчик должен возвращать $arFields, иначе изменения теряются.
  */
 $eventManager->addEventHandler(
     'main',
     'OnBeforeEventSend',
-    'onBeforeEventSendHandler'
+    [ChokerzEventHandlers::class, 'onBeforeMailSend']
 );
 
-function onBeforeEventSendHandler($arFields) {
-    // Можно модифицировать поля почтового события
-    // или добавить дополнительные данные
-    
-    // Например, добавление информации о сайте
-    $arFields['SITE_NAME'] = 'CHOKERZ — амуниция для животных';
-    
-    return $arFields;
+/**
+ * Событие: изменение элемента инфоблока — сброс управляемого кэша
+ * Это ключевой обработчик для актуальности карточек товаров.
+ */
+$eventManager->addEventHandler(
+    'iblock',
+    'OnAfterIBlockElementUpdate',
+    [ChokerzEventHandlers::class, 'onIBlockElementUpdate']
+);
+
+$eventManager->addEventHandler(
+    'iblock',
+    'OnAfterIBlockElementAdd',
+    [ChokerzEventHandlers::class, 'onIBlockElementUpdate']
+);
+
+/**
+ * Класс-контейнер обработчиков событий.
+ * Использование class вместо глобальных функций исключает конфликты имён.
+ */
+class ChokerzEventHandlers
+{
+    /**
+     * Логирование созданного заказа.
+     *
+     * @param \Bitrix\Sale\Order $order
+     */
+    public static function onOrderSaved(\Bitrix\Sale\Order $order): void
+    {
+        \CEventLog::Add([
+            'SEVERITY'      => 'INFO',
+            'AUDIT_TYPE_ID' => 'CHOKERZ_ORDER_CREATED',
+            'MODULE_ID'     => 'sale',
+            'ITEM_ID'       => $order->getId(),
+            'DESCRIPTION'   => 'Заказ #' . $order->getId() . ' создан',
+        ]);
+
+        // TODO: здесь добавить отправку Telegram-уведомления через webhook (ТЗ п.7.3)
+    }
+
+    /**
+     * Логирование регистрации пользователя.
+     *
+     * @param array $arFields
+     */
+    public static function onUserRegister(array $arFields): void
+    {
+        \CEventLog::Add([
+            'SEVERITY'      => 'INFO',
+            'AUDIT_TYPE_ID' => 'CHOKERZ_USER_REGISTER',
+            'MODULE_ID'     => 'main',
+            'ITEM_ID'       => $arFields['ID'] ?? 0,
+            'DESCRIPTION'   => 'Зарегистрирован пользователь: ' . ($arFields['EMAIL'] ?? ''),
+        ]);
+    }
+
+    /**
+     * Модификация полей почтового события.
+     * ОБЯЗАТЕЛЬНО возвращает $arFields — иначе изменения теряются.
+     *
+     * @param  array $arFields
+     * @return array
+     */
+    public static function onBeforeMailSend(array $arFields): array
+    {
+        $arFields['SITE_NAME'] = 'CHOKERZ — амуниция для животных';
+        return $arFields;
+    }
+
+    /**
+     * Сброс управляемого кэша при изменении элемента инфоблока.
+     * Обеспечивает актуальность данных карточки товара без ручного сброса.
+     *
+     * @param array $arFields Поля элемента
+     */
+    public static function onIBlockElementUpdate(array $arFields): void
+    {
+        if (empty($arFields['ID'])) {
+            return;
+        }
+
+        // Сброс кэша конкретного элемента по тегу
+        \CBitrixComponent::clearComponentCache('custom:catalog.item', '/');
+    }
 }
