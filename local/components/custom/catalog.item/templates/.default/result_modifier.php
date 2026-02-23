@@ -6,9 +6,7 @@ $element = &$arResult['ELEMENT'];
 $props   = &$element['PROPERTIES'];
 
 // -----------------------------------------------------------------------
-// 1. Форматирование цены
-//    class.php уже делает это, но result_modifier — страховочный слой
-//    на случай если цена пришла из внешнего источника без форматирования
+// 1. Форматирование цены (если class.php не сформировал)
 // -----------------------------------------------------------------------
 if (!empty($element['PRICE']) && empty($element['FORMATTED_PRICE'])) {
     $element['FORMATTED_PRICE'] = number_format(
@@ -17,18 +15,16 @@ if (!empty($element['PRICE']) && empty($element['FORMATTED_PRICE'])) {
 }
 
 // -----------------------------------------------------------------------
-// 2. Нормализация hex-кода цвета
-//    XML_ID enum-значения хранятся без # или с ним — унифицируем
+// 2. Нормализация hex-кода цвета из XML_ID enum-значения
 // -----------------------------------------------------------------------
 if (!empty($props['COLOR']['VALUE_XML_ID'])) {
     $hex = trim($props['COLOR']['VALUE_XML_ID']);
-    // Добавляем # если отсутствует
     if ($hex !== '' && $hex[0] !== '#') {
         $hex = '#' . $hex;
     }
-    // Валидация: принимаем только #RGB, #RRGGBB, #RRGGBBAA
+    // Принимаем #RGB, #RRGGBB, #RRGGBBAA
     if (!preg_match('/^#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{2})?)?$/', $hex)) {
-        $hex = ''; // невалидный hex — сбрасываем, свотч не рендерится
+        $hex = '';
     }
     $props['COLOR']['HEX'] = $hex;
 } else {
@@ -36,7 +32,7 @@ if (!empty($props['COLOR']['VALUE_XML_ID'])) {
 }
 
 // -----------------------------------------------------------------------
-// 3. Флаги бейджей в одном месте — шаблон не делает логику сам
+// 3. Флаги бейджей
 // -----------------------------------------------------------------------
 $element['BADGES'] = [
     'HIT'  => !empty($props['HIT']['VALUE'])  && $props['HIT']['VALUE']  === 'Y',
@@ -46,7 +42,7 @@ $element['BADGES'] = [
 $element['HAS_BADGES'] = in_array(true, $element['BADGES'], true);
 
 // -----------------------------------------------------------------------
-// 4. Флаг наличия товара
+// 4. Флаг наличия
 // -----------------------------------------------------------------------
 $element['IS_AVAILABLE'] = (
     ($element['CATALOG_AVAILABLE'] ?? 'N') === 'Y'
@@ -54,7 +50,7 @@ $element['IS_AVAILABLE'] = (
 );
 
 // -----------------------------------------------------------------------
-// 5. Флаг наличия ссылок на маркетплейсы — чтобы шаблон не делал логику
+// 5. Флаг наличия ссылок на маркетплейсы
 // -----------------------------------------------------------------------
 $element['HAS_MARKETPLACE_LINKS'] = (
     !empty($props['OZON_LINK']['VALUE'])
@@ -63,13 +59,12 @@ $element['HAS_MARKETPLACE_LINKS'] = (
 );
 
 // -----------------------------------------------------------------------
-// 6. Подготовка офферов (SKU) для рендера и для JS
-//    Шаблон получает готовый массив, JS — JSON-строку через data-атрибут
+// 6. Подготовка офферов (SKU) для шаблона и для JS
 // -----------------------------------------------------------------------
 $offersForJs = [];
 
 foreach ($arResult['OFFERS'] as &$offer) {
-    // Нормализуем hex цвета оффера по той же логике
+    // Нормализуем hex цвета оффера
     if (!empty($offer['COLOR_HEX'])) {
         $hex = trim($offer['COLOR_HEX']);
         if ($hex !== '' && $hex[0] !== '#') {
@@ -83,7 +78,6 @@ foreach ($arResult['OFFERS'] as &$offer) {
 
     $offer['IS_AVAILABLE'] = (float)($offer['QUANTITY'] ?? 0) > 0;
 
-    // Для JS собираем облегчённый объект
     $offersForJs[] = [
         'id'        => (int)$offer['ID'],
         'size'      => $offer['SIZE']      ?? null,
@@ -95,7 +89,7 @@ foreach ($arResult['OFFERS'] as &$offer) {
 }
 unset($offer);
 
-// JSON для передачи в data-атрибут шаблона (безопасное экранирование)
+// JSON для data-атрибута в template.php
 $arResult['OFFERS_JSON'] = htmlspecialchars(
     json_encode($offersForJs, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT),
     ENT_QUOTES,
@@ -103,15 +97,14 @@ $arResult['OFFERS_JSON'] = htmlspecialchars(
 );
 
 // -----------------------------------------------------------------------
-// 7. JSON-LD (Schema.org Product) для SEO
-//    Формируем здесь, выводим в component_epilog.php через $arResult
+// 7. JSON-LD (Schema.org Product) — выводится в component_epilog.php
 // -----------------------------------------------------------------------
 $jsonLd = [
     '@context' => 'https://schema.org',
     '@type'    => 'Product',
     'name'     => $element['NAME'] ?? '',
     'sku'      => $props['ARTICLE']['VALUE'] ?? '',
-    'url'      => (!empty($element['DETAIL_PAGE_URL']))
+    'url'      => !empty($element['DETAIL_PAGE_URL'])
         ? 'https://' . $_SERVER['HTTP_HOST'] . $element['DETAIL_PAGE_URL']
         : '',
 ];
