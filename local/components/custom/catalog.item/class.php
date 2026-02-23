@@ -1,3 +1,21 @@
+<?php
+/**
+ * Компонент карточки товара CHOKERZ
+ *
+ * Изменения (2026-02-23):
+ *  - Исправлен порядок кэширования (StartResultCache до запросов к БД)
+ *  - Заменены несуществующие поля ElementTable на корректные запросы D7
+ *  - Цена и остаток получаются через PriceTable и ProductTable
+ *  - Свойства получены через CIBlockElement::GetProperty
+ *  - Добавлены EndResultCache / AbortResultCache
+ *  - Убран метод getColorHex (перенесён в result_modifier.php)
+ *
+ * Путь: local/components/custom/catalog.item/class.php
+ *
+ * @package   CHOKERZ
+ * @version   1.1
+ */
+
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
@@ -236,6 +254,3 @@ class CatalogItemComponent extends CBitrixComponent
         return $offers;
     }
 }
-
-
-
