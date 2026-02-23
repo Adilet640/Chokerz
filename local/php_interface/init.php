@@ -1,34 +1,34 @@
-<?php
-/**
- * Инициализация кастомных настроек проекта CHOKERZ
+ * @package CHOKERZ
+ * @version 1.1
  */
 
-// Отключаем вывод ошибок на продакшене
-if (!defined('DEBUG_MODE')) {
-    define('DEBUG_MODE', false);
+// Режим отладки: определяется на уровне конфигурации сервера,
+// не хардкодим значение здесь
+if (!defined('CHOKERZ_DEBUG')) {
+    define('CHOKERZ_DEBUG', false);
 }
 
-if (!DEBUG_MODE) {
+if (!CHOKERZ_DEBUG) {
     error_reporting(0);
-    ini_set('display_errors', 0);
+    ini_set('display_errors', '0');
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
 }
 
-// Подключение кастомных обработчиков событий
-if (file_exists($_SERVER['DOCUMENT_ROOT'].'/local/php_interface/include/events.php')) {
-    include_once($_SERVER['DOCUMENT_ROOT'].'/local/php_interface/include/events.php');
+// Подключение обработчиков событий
+$eventsFile = $_SERVER['DOCUMENT_ROOT'] . '/local/php_interface/include/events.php';
+if (file_exists($eventsFile)) {
+    include_once $eventsFile;
 }
 
-// Подключение кастомных функций
-if (file_exists($_SERVER['DOCUMENT_ROOT'].'/local/php_interface/include/functions.php')) {
-    include_once($_SERVER['DOCUMENT_ROOT'].'/local/php_interface/include/functions.php');
+// Подключение вспомогательных функций
+$functionsFile = $_SERVER['DOCUMENT_ROOT'] . '/local/php_interface/include/functions.php';
+if (file_exists($functionsFile)) {
+    include_once $functionsFile;
 }
 
-// Настройки кэширования
-\CBitrixComponent::SetCacheSettings(array(
-    'ttl' => 3600, // 1 час
-    'cache_type' => 'managed',
-));
-
-// Отключаем стандартные стили Битрикс
-\Bitrix\Main\Page\Asset::getInstance()->addJs('/local/templates/chokerz/js/main.js');
-\Bitrix\Main\Page\Asset::getInstance()->addCss('/local/templates/chokerz/styles/main.css');
+// Примечание: JS и CSS подключаются в header.php шаблона через Asset::getInstance(),
+// чтобы они добавлялись только когда шаблон реально используется.
+// Дублировать их здесь нельзя — Asset::addJs() при повторе добавляет тег дважды
+// в тех версиях Битрикс, где нет дедупликации по умолчанию.
