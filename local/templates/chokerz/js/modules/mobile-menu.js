@@ -1,131 +1,102 @@
 /**
- * Модуль мобильного меню
- * 
- * @package CHOKERZ
- * @version 1.0.0
+ * mobile-menu.js — модуль мобильного меню CHOKERZ
+ *
+ * Работает с HTML-структурой из header.php:
+ *   #site-burger   — кнопка-бургер
+ *   #site-nav      — навигационный блок
+ *   #nav-overlay   — полупрозрачный оверлей
+ *
+ * Состояние передаётся ТОЛЬКО через CSS-классы и aria-атрибуты.
+ * Никаких inline-стилей (element.style.*) не используется.
+ *
+ * @package   CHOKERZ
+ * @version   2.0
  */
 
 class MobileMenu {
-    constructor() {
-        this.burgerBtn = null;
-        this.nav = null;
-        this.isOpen = false;
-        this.initComplete = false;
-    }
+    #burger  = null;
+    #nav     = null;
+    #overlay = null;
+    #isOpen  = false;
 
-    /**
-     * Инициализация модуля
-     */
+    /** Инициализация. Возвращает this для цепочки вызовов. */
     init() {
-        this.burgerBtn = document.getElementById('burgerBtn');
-        this.nav = document.getElementById('mainNav');
+        this.#burger  = document.getElementById('site-burger');
+        this.#nav     = document.getElementById('site-nav');
+        this.#overlay = document.getElementById('nav-overlay');
 
-        if (!this.burgerBtn || !this.nav) {
-            console.warn('CHOKERZ: Мобильное меню не найдено');
+        if (!this.#burger || !this.#nav) {
             return this;
         }
 
-        this.bindEvents();
-        this.initComplete = true;
-
-        console.log('CHOKERZ: Мобильное меню инициализировано');
-
+        this.#bindEvents();
         return this;
     }
 
-    /**
-     * Привязка событий
-     */
-    bindEvents() {
-        // Клик по бургер-кнопке
-        this.burgerBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.toggle();
+    /** Привязка всех слушателей */
+    #bindEvents() {
+        // Клик по бургеру
+        this.#burger.addEventListener('click', () => this.toggle());
+
+        // Клик по оверлею → закрыть
+        this.#overlay?.addEventListener('click', () => this.close());
+
+        // Ссылки внутри nav → закрыть (UX для SPA-переходов или якорей)
+        this.#nav.querySelectorAll('.site-nav__link').forEach(link => {
+            link.addEventListener('click', () => this.close());
         });
 
-        // Клик вне меню для закрытия
-        document.addEventListener('click', (e) => {
-            if (this.isOpen && !this.nav.contains(e.target) && !this.burgerBtn.contains(e.target)) {
+        // Escape → закрыть
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && this.#isOpen) {
                 this.close();
+                this.#burger.focus(); // вернуть фокус на бургер (a11y)
             }
         });
 
-        // Закрытие меню при нажатии на ссылку
-        const navLinks = this.nav.querySelectorAll('.nav__link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                this.close();
-            });
-        });
-
-        // Закрытие меню при изменении размера окна (если экран стал большим)
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 992 && this.isOpen) {
-                this.close();
-            }
+        // При переходе на desktop-ширину — принудительно закрыть
+        const mq = window.matchMedia('(min-width: 992px)');
+        mq.addEventListener('change', e => {
+            if (e.matches && this.#isOpen) this.close();
         });
     }
 
-    /**
-     * Переключение состояния меню
-     */
+    /** Переключить состояние меню */
     toggle() {
-        if (this.isOpen) {
-            this.close();
-        } else {
-            this.open();
-        }
+        this.#isOpen ? this.close() : this.open();
     }
 
-    /**
-     * Открытие меню
-     */
+    /** Открыть меню */
     open() {
-        this.nav.style.display = 'block';
-        this.isOpen = true;
-        this.burgerBtn.setAttribute('aria-expanded', 'true');
-        
-        // Анимация появления
-        setTimeout(() => {
-            this.nav.style.opacity = '1';
-            this.nav.style.transform = 'translateY(0)';
-        }, 10);
+        this.#isOpen = true;
 
-        // Блокировка прокрутки страницы
-        document.body.style.overflow = 'hidden';
+        this.#nav.classList.add('site-nav--open');
+        this.#overlay?.classList.add('nav-overlay--visible');
+        this.#burger.classList.add('burger--active');
 
-        console.log('CHOKERZ: Мобильное меню открыто');
+        this.#burger.setAttribute('aria-expanded', 'true');
+        this.#burger.setAttribute('aria-label',    'Закрыть меню');
+        this.#nav.setAttribute('aria-hidden',      'false');
+        document.body.classList.add('body--nav-open');
+
+        // Перевести фокус в первый пункт меню (a11y)
+        this.#nav.querySelector('.site-nav__link')?.focus();
     }
 
-    /**
-     * Закрытие меню
-     */
+    /** Закрыть меню */
     close() {
-        this.nav.style.opacity = '0';
-        this.nav.style.transform = 'translateY(-20px)';
-        this.isOpen = false;
-        this.burgerBtn.setAttribute('aria-expanded', 'false');
-        
-        // Скрытие меню после анимации
-        setTimeout(() => {
-            this.nav.style.display = 'none';
-        }, 300);
+        this.#isOpen = false;
 
-        // Разблокировка прокрутки страницы
-        document.body.style.overflow = '';
+        this.#nav.classList.remove('site-nav--open');
+        this.#overlay?.classList.remove('nav-overlay--visible');
+        this.#burger.classList.remove('burger--active');
 
-        console.log('CHOKERZ: Мобильное меню закрыто');
-    }
-
-    /**
-     * Проверка инициализации
-     */
-    isInitialized() {
-        return this.initComplete;
+        this.#burger.setAttribute('aria-expanded', 'false');
+        this.#burger.setAttribute('aria-label',    'Открыть меню');
+        this.#nav.setAttribute('aria-hidden',      'true');
+        document.body.classList.remove('body--nav-open');
     }
 }
 
-// Создание экземпляра и экспорт
 const mobileMenu = new MobileMenu();
-
 export default mobileMenu;
