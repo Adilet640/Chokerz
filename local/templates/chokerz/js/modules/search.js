@@ -1,136 +1,110 @@
 /**
- * Модуль поиска
- * 
- * @package CHOKERZ
- * @version 1.0.0
+ * search.js — модуль поискового модального окна CHOKERZ
+ *
+ * Работает с HTML-структурой из header.php:
+ *   [data-action="search-open"]  — кнопка открытия (в .header-actions)
+ *   [data-action="search-close"] — кнопка закрытия и оверлей
+ *   #search-modal                — диалоговое окно (role="dialog")
+ *   .search-modal__input         — поле ввода
+ *   .search-modal__form          — форма (action="/search/", method="get")
+ *
+ * Состояние — только через CSS-классы и aria-атрибуты.
+ * Никаких inline-стилей.
+ *
+ * @package   CHOKERZ
+ * @version   2.0
  */
 
 class Search {
-    constructor() {
-        this.searchInput = null;
-        this.searchForm = null;
-        this.initComplete = false;
-    }
+    #modal       = null;
+    #input       = null;
+    #openBtns    = [];
+    #closeBtns   = [];
+    #triggerEl   = null; // элемент, с которого открыли — для возврата фокуса
 
-    /**
-     * Инициализация модуля
-     */
+    /** Инициализация */
     init() {
-        this.searchInput = document.querySelector('.search__input');
-        this.searchForm = document.querySelector('.search__form');
+        this.#modal     = document.getElementById('search-modal');
+        this.#input     = this.#modal?.querySelector('.search-modal__input');
+        this.#openBtns  = [...document.querySelectorAll('[data-action="search-open"]')];
+        this.#closeBtns = [...document.querySelectorAll('[data-action="search-close"]')];
 
-        if (!this.searchInput) {
-            console.warn('CHOKERZ: Поле поиска не найдено');
+        if (!this.#modal) {
             return this;
         }
 
-        this.bindEvents();
-        this.initComplete = true;
-
-        console.log('CHOKERZ: Поиск инициализирован');
-
+        this.#bindEvents();
         return this;
     }
 
-    /**
-     * Привязка событий
-     */
-    bindEvents() {
-        // Фокус на поле поиска
-        this.searchInput.addEventListener('focus', () => {
-            this.onFocus();
-        });
-
-        // Потеря фокуса
-        this.searchInput.addEventListener('blur', () => {
-            this.onBlur();
-        });
-
-        // Ввод текста (можно добавить автодополнение)
-        this.searchInput.addEventListener('input', (e) => {
-            this.onInput(e);
-        });
-
-        // Отправка формы
-        if (this.searchForm) {
-            this.searchForm.addEventListener('submit', (e) => {
-                this.onSubmit(e);
+    #bindEvents() {
+        // Открытие
+        this.#openBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.#triggerEl = btn;
+                this.open();
             });
-        }
+        });
+
+        // Закрытие через кнопки и оверлей (backdrop)
+        this.#closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.close());
+        });
+
+        // Escape → закрыть
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && this.#isOpen()) {
+                this.close();
+            }
+        });
+
+        // Не передаём пустой запрос
+        this.#modal.querySelector('.search-modal__form')
+            ?.addEventListener('submit', e => this.#onSubmit(e));
     }
 
-    /**
-     * Обработчик фокуса
-     */
-    onFocus() {
-        this.searchInput.parentElement?.classList.add('search__form--focused');
+    /** Открыть модальное окно поиска */
+    open() {
+        this.#modal.classList.add('search-modal--open');
+        this.#modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('body--search-open');
+
+        // Обновить кнопки-триггеры
+        this.#openBtns.forEach(btn => btn.setAttribute('aria-expanded', 'true'));
+
+        // Автофокус на инпут (с задержкой — дать CSS-анимации начаться)
+        requestAnimationFrame(() => {
+            this.#input?.focus();
+        });
     }
 
-    /**
-     * Обработчик потери фокуса
-     */
-    onBlur() {
-        this.searchInput.parentElement?.classList.remove('search__form--focused');
+    /** Закрыть модальное окно поиска */
+    close() {
+        this.#modal.classList.remove('search-modal--open');
+        this.#modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('body--search-open');
+
+        this.#openBtns.forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+
+        // Вернуть фокус на элемент, с которого открыли (a11y)
+        this.#triggerEl?.focus();
+        this.#triggerEl = null;
     }
 
-    /**
-     * Обработчик ввода текста
-     * @param {Event} e - Событие ввода
-     */
-    onInput(e) {
-        const value = e.target.value.trim();
-        
-        // Можно добавить автодополнение здесь
-        if (value.length > 2) {
-            this.showAutocomplete(value);
-        } else {
-            this.hideAutocomplete();
-        }
+    /** Проверка — открыт ли модал */
+    #isOpen() {
+        return this.#modal.classList.contains('search-modal--open');
     }
 
-    /**
-     * Обработчик отправки формы
-     * @param {Event} e - Событие отправки
-     */
-    onSubmit(e) {
-        const value = this.searchInput.value.trim();
-        
-        if (value.length === 0) {
+    /** Валидация перед отправкой */
+    #onSubmit(e) {
+        const query = this.#input?.value.trim() ?? '';
+        if (query.length === 0) {
             e.preventDefault();
-            this.searchInput.focus();
-            return false;
+            this.#input?.focus();
         }
-
-        console.log('CHOKERZ: Поиск:', value);
-        return true;
-    }
-
-    /**
-     * Показать автодополнение
-     * @param {string} query - Поисковый запрос
-     */
-    showAutocomplete(query) {
-        // Здесь можно реализовать автодополнение через AJAX
-        // Например, запрос к /ajax/search.php?q=query
-        console.log('CHOKERZ: Автодополнение для:', query);
-    }
-
-    /**
-     * Скрыть автодополнение
-     */
-    hideAutocomplete() {
-        // Скрыть результаты автодополнения
-    }
-
-    /**
-     * Проверка инициализации
-     */
-    isInitialized() {
-        return this.initComplete;
     }
 }
 
-// Создание экземпляра и экспорт
 const search = new Search();
-
 export default search;
