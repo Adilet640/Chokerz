@@ -1,22 +1,5 @@
 <?php
-/**
- * template.php — bitrix:catalog.element / chokerz
- *
- * Детальная страница товара CHOKERZ.
- *
- * Структура разметки:
- *   .product-detail              — корневой article
- *     .product-detail__gallery   — галерея (thumbnails + main image)
- *     .product-detail__info      — правая панель (цена, опции, CTA)
- *   .product-tabs                — вкладки: Описание / Характеристики / Отзывы
- *   .product-related             — блок "Похожие товары" (component include)
- *
- * Все данные подготовлены в result_modifier.php.
- * Инлайн-скрипты запрещены (ТЗ п.6.1) — JS в component_epilog.php + js/modules/product-detail.js
- *
- * @package CHOKERZ
- * @version 1.0
- */
+
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
