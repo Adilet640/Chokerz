@@ -1,7 +1,7 @@
 <?php
 /**
- * Страница списка заказов ЛК
- * URL: /personal/order/list/
+ * Страница детали заказа ЛК
+ * URL: /personal/order/detail/#ID#/
  */
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
@@ -13,9 +13,8 @@ if (!$USER->IsAuthorized()) {
     LocalRedirect(SITE_DIR . 'personal/login/?back_url=' . urlencode($_SERVER['REQUEST_URI']));
 }
 
-$APPLICATION->SetTitle('Мои заказы');
-$APPLICATION->SetPageProperty('body_class', 'page-lk page-lk-orders');
-$APPLICATION->SetPageProperty('description', 'История заказов CHOKERZ');
+$APPLICATION->SetTitle('Заказ');
+$APPLICATION->SetPageProperty('body_class', 'page-lk page-lk-order-detail');
 ?>
 
 <?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/header.php'); ?>
@@ -28,16 +27,12 @@ $APPLICATION->SetPageProperty('description', 'История заказов CHOK
         <div class="lk-layout__content lk-content">
             <?php
             $APPLICATION->IncludeComponent(
-                'bitrix:sale.personal.order.list',
+                'bitrix:sale.personal.order.detail',
                 '.default',
                 [
-                    'PATH_TO_DETAIL'    => '/personal/order/detail/#ID#/',
-                    'SORT_BY'           => 'DATE_INSERT',
-                    'SORT_ORDER'        => 'DESC',
-                    'CACHE_TYPE'        => 'N', // Не кешировать — список заказов должен быть актуальным
-                    'COUNT_ELEMENTS'    => 20,
-                    'SET_TITLE'         => 'N',
-                    'SET_BROWSER_TITLE' => 'N',
+                    'PATH_TO_LIST'  => '/personal/order/list/',
+                    'CACHE_TYPE'    => 'N',
+                    'SET_TITLE'     => 'N',
                 ],
                 false
             );
