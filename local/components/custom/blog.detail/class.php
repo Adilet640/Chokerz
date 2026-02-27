@@ -1,10 +1,5 @@
 <?php
-/**
- * Компонент детальной страницы блога CHOKERZ
- * Выводит: статью/видео, содержание (якоря из H2), теги, «Смотрите также»
- *
- * @package chokerz
- */
+
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
@@ -35,7 +30,7 @@ class BlogDetailComponent extends CBitrixComponent
             return;
         }
 
-        // Определяем символьный код из URL
+       
         $code = trim($this->arParams['ELEMENT_CODE'] ?: ($_REQUEST['CODE'] ?? ''));
         if ($code === '') {
             $this->return404();
@@ -86,9 +81,7 @@ class BlogDetailComponent extends CBitrixComponent
         $this->IncludeComponentTemplate();
     }
 
-    /**
-     * Загрузка элемента блога по символьному коду
-     */
+   
     private function fetchItem(string $code): ?array
     {
         $res = \CIBlockElement::GetList(
@@ -115,7 +108,7 @@ class BlogDetailComponent extends CBitrixComponent
         $fields = $el->GetFields();
         $props  = $el->GetProperties(['CODE' => ['TYPE', 'VIDEO_ID', 'VIDEO_DURATION', 'VIDEO_EMBED']]);
 
-        // Изображения
+       
         $detailSrc  = '';
         $previewSrc = '';
 
@@ -130,13 +123,13 @@ class BlogDetailComponent extends CBitrixComponent
 
         $heroSrc = $detailSrc ?: $previewSrc;
 
-        // Тело статьи
+       
         $detailText = $fields['DETAIL_TEXT'] ?? '';
         if ($fields['DETAIL_TEXT_TYPE'] === 'text') {
             $detailText = nl2br(htmlspecialcharsEx($detailText));
         }
 
-        // Генерация оглавления из H2 в теле статьи
+      
         $toc = $this->extractToc($detailText);
 
         return [
@@ -158,22 +151,20 @@ class BlogDetailComponent extends CBitrixComponent
         ];
     }
 
-    /**
-     * Извлечение оглавления (H2) из HTML тела статьи и добавление id-якорей
-     */
+  
     private function extractToc(string &$html): array
     {
         $toc = [];
         $i   = 0;
 
         $html = preg_replace_callback(
-            '/<h2([^>]*)>(.*?)<\/h2>/is',
+            '/<h1([^>]*)>(.*?)<\/h1>/is',
             static function ($matches) use (&$toc, &$i): string {
                 $i++;
                 $text   = strip_tags($matches[2]);
                 $anchor = 'section-' . $i;
                 $toc[]  = ['ANCHOR' => $anchor, 'TEXT' => $text];
-                return '<h2' . $matches[1] . ' id="' . $anchor . '">' . $matches[2] . '</h2>';
+                return '<h1' . $matches[1] . ' id="' . $anchor . '">' . $matches[2] . '</h1>';
             },
             $html
         );
