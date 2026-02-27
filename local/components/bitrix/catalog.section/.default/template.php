@@ -1,29 +1,4 @@
 <?php
-/**
- * template.php — bitrix:catalog.section / chokerz
- *
- * Страница раздела каталога CHOKERZ.
- *
- * Структура:
- *   Breadcrumbs (цепочка хлебных крошек из Битрикс)
- *   .catalog-section__hero       — заголовок раздела + описание
- *   .catalog-layout               — двухколоночная сетка
- *     .catalog-layout__filter     — боковой фильтр (catalog.smart.filter)
- *     .catalog-layout__content
- *       .catalog-controls         — строка сортировки + кол-во товаров
- *       .catalog-grid             — сетка карточек (product-card)
- *       .catalog-pagination       — «Загрузить ещё» + классическая пагинация
- *   .catalog-section__seo         — SEO-текст (только на первой странице)
- *
- * SEO требования (ТЗ п.8.2):
- *   - rel=canonical через $APPLICATION->SetPageProperty
- *   - Пагинация через <a href> (ТЗ п.8.2)
- *   - Кнопка «Загрузить ещё» содержит <a href> на следующую страницу
- *   - SEO-текст только на первой странице, не дублируется на страницах пагинации
- *
- * @package CHOKERZ
- * @version 1.0
- */
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
