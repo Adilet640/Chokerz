@@ -1,94 +1,318 @@
-/* ========================================
-   Блок: Герой-секция (Hero)
-   ======================================== */
+/* =============================================================================
+   hero.css — Герой-баннер главной страницы CHOKERZ
+   BEM: .hero
+   ============================================================================= */
 
+/* ── Секция ────────────────────────────────────────────────────────────────── */
 .hero {
-    padding: 6rem 0;
-    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg) 100%);
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  background-color: var(--color-brand-navy);
+  overflow: hidden;
+  min-height: 520px;
+  display: flex;
+  align-items: stretch;
 }
 
+/* Декоративный фон: диагональная полоска акцента */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55%;
+  height: 100%;
+  background-color: var(--color-bg-light);
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
+  z-index: 0;
+}
+
+/* Полоска-акцент снизу */
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-brand-amber);
+  z-index: 2;
+}
+
+/* ── Контейнер ─────────────────────────────────────────────────────────────── */
 .hero__container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 40px;
+  padding-top: 60px;
+  padding-bottom: 64px;
 }
 
+/* ── Контент (левая колонка) ───────────────────────────────────────────────── */
 .hero__content {
-    z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
 }
 
 .hero__title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: var(--color-primary);
-    line-height: 1.1;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  margin: 0;
+}
+
+/* Акцентное слово — выделено янтарём (обёртывается вручную или через JS) */
+.hero__title mark {
+  background: none;
+  color: var(--color-brand-amber);
 }
 
 .hero__subtitle {
-    font-size: 1.5rem;
-    color: var(--color-text-muted);
-    margin-bottom: 2rem;
-    line-height: 1.4;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(14px, 1.4vw, 18px);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Описание под заголовком (опционально) */
+.hero__desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 420px;
+}
+
+/* ── Кнопки ────────────────────────────────────────────────────────────────── */
+.hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
 }
 
 .hero__btn {
-    padding: 1rem 2.5rem;
-    font-size: 1.125rem;
-    font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 2px solid transparent;
 }
 
+/* Основная кнопка */
+.hero__btn.btn--primary,
+.btn--primary {
+  background-color: var(--color-brand-amber);
+  color: var(--color-white);
+  border-color: var(--color-brand-amber);
+  box-shadow: 0 4px 16px rgba(232, 160, 32, 0.35);
+}
+
+.hero__btn.btn--primary:hover,
+.btn--primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(232, 160, 32, 0.45);
+}
+
+.hero__btn.btn--primary:active,
+.btn--primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(232, 160, 32, 0.3);
+}
+
+/* Второстепенная кнопка */
+.hero__btn.btn--outline,
+.btn--outline {
+  background-color: transparent;
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.hero__btn.btn--outline:hover,
+.btn--outline:hover {
+  border-color: var(--color-white);
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Один btn (без доп. модификаторов) — primary по умолчанию */
+.hero__btn:not(.btn--outline) {
+  background-color: var(--color-brand-amber);
+  color: var(--color-white);
+  box-shadow: 0 4px 16px rgba(232, 160, 32, 0.35);
+}
+
+.hero__btn:not(.btn--outline):hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(232, 160, 32, 0.45);
+}
+
+/* ── Изображение (правая колонка) ──────────────────────────────────────────── */
 .hero__image {
-    position: relative;
-    z-index: 1;
-    text-align: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .hero__img {
-    max-width: 100%;
-    height: auto;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
 }
 
-/* Адаптивность */
+/* Декоративная рамка за изображением */
+.hero__image::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: -16px;
+  bottom: -16px;
+  border: 2px solid var(--color-brand-amber);
+  border-radius: var(--radius-md);
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* ── Бейджи / метки поверх контента ───────────────────────────────────────── */
+.hero__badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 20px;
+  background-color: rgba(232, 160, 32, 0.15);
+  color: var(--color-brand-amber);
+  border: 1px solid rgba(232, 160, 32, 0.3);
+}
+
+/* =============================================================================
+   RESPONSIVE — Tablet (≤ 1024px)
+   ============================================================================= */
 @media (max-width: 1024px) {
-    .hero__container {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 3rem;
-    }
-    
-    .hero__content {
-        margin: 0 auto;
-    }
-    
-    .hero__title {
-        font-size: 2.5rem;
-    }
-    
-    .hero__subtitle {
-        font-size: 1.25rem;
-    }
+  .hero__container {
+    gap: 24px;
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .hero::before {
+    width: 50%;
+  }
 }
 
+/* =============================================================================
+   RESPONSIVE — Mobile (≤ 768px)
+   ============================================================================= */
 @media (max-width: 768px) {
-    .hero {
-        padding: 4rem 0;
-    }
-    
-    .hero__title {
-        font-size: 2rem;
-    }
-    
-    .hero__subtitle {
-        font-size: 1.125rem;
-    }
-    
-    .hero__btn {
-        width: 100%;
-    }
+  .hero {
+    min-height: auto;
+  }
+
+  /* Убираем диагональную полоску */
+  .hero::before {
+    display: none;
+  }
+
+  .hero__container {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 36px;
+    padding-bottom: 40px;
+  }
+
+  /* Изображение идёт первым на мобильном */
+  .hero__image {
+    order: -1;
+  }
+
+  .hero__image::before {
+    display: none;
+  }
+
+  .hero__img {
+    max-width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+  }
+
+  .hero__content {
+    gap: 16px;
+  }
+
+  .hero__actions {
+    width: 100%;
+  }
+
+  .hero__btn {
+    flex: 1;
+    justify-content: center;
+    padding: 13px 20px;
+    font-size: 12px;
+  }
+
+  .hero__desc {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — Small Mobile (≤ 480px)
+   ============================================================================= */
+@media (max-width: 480px) {
+  .hero__actions {
+    flex-direction: column;
+  }
+
+  .hero__btn {
+    width: 100%;
+  }
+
+  .hero__img {
+    max-height: 220px;
+  }
 }
