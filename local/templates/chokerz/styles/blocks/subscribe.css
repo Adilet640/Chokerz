@@ -1,102 +1,358 @@
-/* ========================================
-   Блок: Подписка (Subscribe)
-   ======================================== */
+/* =============================================================================
+   subscribe.css — Блок подписки на новости CHOKERZ
+   BEM: .subscribe
+   ============================================================================= */
 
+/* ── Секция ────────────────────────────────────────────────────────────────── */
 .subscribe {
-    padding: 6rem 0;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-white);
-    text-align: center;
+  background-color: var(--color-brand-navy);
+  padding: var(--section-padding-y, 72px) 0;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Декоративный фоновый паттерн — повторяющиеся «лапки» */
+.subscribe::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(232, 160, 32, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(232, 160, 32, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Акцентная линия сверху */
+.subscribe::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-brand-amber), transparent);
+}
+
+/* ── Контейнер ─────────────────────────────────────────────────────────────── */
 .subscribe__container {
-    /* Контейнер уже стилизован в .container */
+  position: relative;
+  z-index: 1;
 }
 
+/* ── Контент ───────────────────────────────────────────────────────────────── */
 .subscribe__content {
-    max-width: 600px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  max-width: 540px;
+  margin: 0 auto;
 }
 
+/* ── Заголовок ─────────────────────────────────────────────────────────────── */
 .subscribe__title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(22px, 2.8vw, 34px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-white);
+  margin: 0;
+  line-height: 1.2;
 }
 
+/* Акцентное слово */
+.subscribe__title mark {
+  background: none;
+  color: var(--color-brand-amber);
+}
+
+/* ── Описание ──────────────────────────────────────────────────────────────── */
 .subscribe__desc {
-    font-size: 1.25rem;
-    color: var(--color-white-muted);
-    margin-bottom: 2rem;
-    line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  max-width: 420px;
 }
 
-/* Форма подписки */
+/* ── Форма ─────────────────────────────────────────────────────────────────── */
 .subscribe__form {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+  display: flex;
+  gap: 0;
+  width: 100%;
+  max-width: 460px;
+  margin-top: 8px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
 
-.subscribe__input {
-    flex: 1;
-    padding: 1rem 1.5rem;
-    border: 2px solid var(--color-white);
-    border-radius: var(--radius-md);
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--color-white);
-    font-size: 1rem;
-    transition: all 0.3s ease;
+/* Если форма от Bitrix — overriding стили внутренних элементов */
+.subscribe__form .form-input,
+.subscribe__form input[type="email"],
+.subscribe__form input[type="text"] {
+  flex: 1;
+  padding: 14px 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--color-brand-navy);
+  background-color: var(--color-white);
+  border: none;
+  outline: none;
+  min-width: 0;
+  appearance: none;
 }
 
-.subscribe__input::placeholder {
-    color: var(--color-white-muted);
+.subscribe__form .form-input::placeholder,
+.subscribe__form input[type="email"]::placeholder,
+.subscribe__form input[type="text"]::placeholder {
+  color: var(--color-text-muted);
 }
 
-.subscribe__input:focus {
-    border-color: var(--color-white);
-    background-color: rgba(255, 255, 255, 0.15);
-    outline: none;
+.subscribe__form .form-input:focus,
+.subscribe__form input[type="email"]:focus,
+.subscribe__form input[type="text"]:focus {
+  outline: none;
+  background-color: var(--color-white);
+  box-shadow: inset 0 0 0 2px rgba(232, 160, 32, 0.4);
 }
 
-.subscribe__btn {
-    padding: 1rem 2rem;
-    background-color: var(--color-white);
-    color: var(--color-primary);
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
+/* Кнопка отправки */
+.subscribe__form .form-btn,
+.subscribe__form button[type="submit"],
+.subscribe__form input[type="submit"] {
+  flex-shrink: 0;
+  padding: 14px 24px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-white);
+  background-color: var(--color-brand-amber);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  appearance: none;
 }
 
-.subscribe__btn:hover {
-    background-color: var(--color-white-muted);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+.subscribe__form .form-btn:hover,
+.subscribe__form button[type="submit"]:hover,
+.subscribe__form input[type="submit"]:hover {
+  background-color: var(--color-primary-dark);
 }
 
-/* Адаптивность */
+/* ── Стили для Bitrix-компонента формы ─────────────────────────────────────── */
+/* Оборачивающий div от bitrix:form.result.new */
+.subscribe__content .bx-form,
+.subscribe__content .bitrix-webform {
+  width: 100%;
+}
+
+.subscribe__content .bx-form .bx-form-content,
+.subscribe__content .bitrix-webform .bx-form-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Скрываем заголовок формы от Bitrix (у нас уже есть subscribe__title) */
+.subscribe__content .bx-form .bx-form-header,
+.subscribe__content .bitrix-webform .bx-form-header {
+  display: none;
+}
+
+/* Строки полей */
+.subscribe__content .bx-form .bx-form-row {
+  width: 100%;
+  max-width: 460px;
+}
+
+.subscribe__content .bx-form .bx-form-row input[type="email"],
+.subscribe__content .bx-form .bx-form-row input[type="text"] {
+  width: 100%;
+  padding: 14px 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--color-brand-navy);
+  background-color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Кнопка отправки от Bitrix */
+.subscribe__content .bx-form .bx-form-button-container {
+  width: 100%;
+  max-width: 460px;
+}
+
+.subscribe__content .bx-form .bx-form-button-container button,
+.subscribe__content .bx-form .bx-form-button-container input[type="submit"] {
+  width: 100%;
+  padding: 14px 24px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-white);
+  background-color: var(--color-brand-amber);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.subscribe__content .bx-form .bx-form-button-container button:hover,
+.subscribe__content .bx-form .bx-form-button-container input[type="submit"]:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Сообщение об успехе */
+.subscribe__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-white);
+}
+
+.subscribe__success-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(232, 160, 32, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-brand-amber);
+}
+
+.subscribe__success-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+/* ── Дисклеймер под формой ─────────────────────────────────────────────────── */
+.subscribe__disclaimer {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  max-width: 360px;
+}
+
+.subscribe__disclaimer a {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.subscribe__disclaimer a:hover {
+  color: var(--color-brand-amber);
+}
+
+/* ── Социальные ссылки под формой ─────────────────────────────────────────── */
+.subscribe__socials {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.subscribe__social-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.subscribe__social-link:hover {
+  background-color: rgba(232, 160, 32, 0.12);
+  color: var(--color-brand-amber);
+  border-color: rgba(232, 160, 32, 0.3);
+}
+
+/* =============================================================================
+   RESPONSIVE — Tablet (≤ 1024px)
+   ============================================================================= */
+@media (max-width: 1024px) {
+  .subscribe {
+    padding: 56px 0;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — Mobile (≤ 768px)
+   ============================================================================= */
 @media (max-width: 768px) {
-    .subscribe {
-        padding: 4rem 0;
-    }
-    
-    .subscribe__title {
-        font-size: 2rem;
-    }
-    
-    .subscribe__desc {
-        font-size: 1.125rem;
-    }
-    
-    .subscribe__form {
-        flex-direction: column;
-    }
-    
-    .subscribe__input,
-    .subscribe__btn {
-        width: 100%;
-    }
+  .subscribe {
+    padding: 48px 0;
+  }
+
+  .subscribe__content {
+    gap: 14px;
+  }
+
+  .subscribe__form {
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+    overflow: visible;
+    box-shadow: none;
+    gap: 10px;
+  }
+
+  .subscribe__form .form-input,
+  .subscribe__form input[type="email"],
+  .subscribe__form input[type="text"] {
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .subscribe__form .form-btn,
+  .subscribe__form button[type="submit"],
+  .subscribe__form input[type="submit"] {
+    border-radius: var(--radius-sm);
+    width: 100%;
+  }
+
+  .subscribe__socials {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — Small Mobile (≤ 480px)
+   ============================================================================= */
+@media (max-width: 480px) {
+  .subscribe {
+    padding: 36px 0;
+  }
+
+  .subscribe__disclaimer {
+    font-size: 10px;
+  }
 }
