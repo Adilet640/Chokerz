@@ -1,0 +1,1296 @@
+/* =============================================================================
+   lk.css — Личный кабинет CHOKERZ
+   BEM: .lk-layout, .lk-sidebar, .lk-nav,
+        .lk-dashboard, .lk-greeting, .lk-section-head,
+        .lk-order-card, .lk-order-status, .lk-order-filter,
+        .lk-orders, .lk-page-head,
+        .lk-profile, .lk-form-section, .lk-form-field,
+        .lk-address-list, .lk-address-item, .lk-address-add,
+        .lk-wishlist-preview, .lk-wishlist-item,
+        .lk-notifications, .lk-toggle,
+        .lk-tg-notify, .lk-empty-state
+   ============================================================================= */
+
+/* =============================================================================
+   LK-LAYOUT — двухколоночный лэйаут: сайдбар + контент
+   ============================================================================= */
+.lk-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 28px;
+  align-items: start;
+  padding: 32px 0 64px;
+}
+
+/* =============================================================================
+   LK-SIDEBAR — левая колонка с навигацией
+   ============================================================================= */
+.lk-sidebar {
+  position: sticky;
+  top: calc(var(--header-height, 72px) + 16px);
+  background-color: var(--color-brand-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Шапка сайдбара: аватар + имя */
+.lk-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-light);
+}
+
+.lk-sidebar__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-brand-amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-brand-white);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.lk-sidebar__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lk-sidebar__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lk-sidebar__user-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lk-sidebar__user-email {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =============================================================================
+   LK-NAV — навигационное меню в сайдбаре
+   ============================================================================= */
+.lk-nav {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.lk-nav__item {
+  display: flex;
+}
+
+.lk-nav__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  position: relative;
+  border-left: 3px solid transparent;
+  line-height: 1.3;
+}
+
+.lk-nav__link:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-brand-navy);
+}
+
+/* Активный пункт */
+.lk-nav__link--active,
+.lk-nav__item--active .lk-nav__link {
+  color: var(--color-brand-amber);
+  background-color: rgba(232, 160, 32, 0.06);
+  border-left-color: var(--color-brand-amber);
+  font-weight: 700;
+}
+
+.lk-nav__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+/* Бейдж-счётчик */
+.lk-nav__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--color-brand-amber);
+  color: var(--color-brand-white);
+  margin-left: auto;
+  line-height: 1;
+}
+
+/* Разделитель */
+.lk-nav__sep {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 6px 16px;
+}
+
+/* Выход */
+.lk-nav__link--logout {
+  color: var(--color-text-muted);
+}
+
+.lk-nav__link--logout:hover {
+  color: var(--color-danger);
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+/* =============================================================================
+   LK-CONTENT — правая колонка
+   ============================================================================= */
+.lk-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* =============================================================================
+   LK-PAGE-HEAD — заголовок страницы
+   ============================================================================= */
+.lk-page-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.lk-page-head__title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 800;
+  color: var(--color-brand-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.lk-page-head__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* =============================================================================
+   LK-DASHBOARD — дашборд
+   ============================================================================= */
+.lk-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Приветствие ───────────────────────────────────────────────────────────── */
+.lk-greeting {
+  background-color: var(--color-brand-navy);
+  border-radius: var(--radius-md);
+  padding: 28px 28px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.lk-greeting::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--color-brand-amber);
+}
+
+.lk-greeting__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lk-greeting__label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-brand-amber);
+}
+
+.lk-greeting__name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 800;
+  color: var(--color-brand-white);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.lk-greeting__subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 4px 0 0;
+}
+
+.lk-greeting__count {
+  color: var(--color-brand-amber);
+  font-weight: 700;
+}
+
+.lk-greeting__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lk-greeting__btn {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--color-brand-white);
+}
+
+.lk-greeting__btn:hover {
+  border-color: var(--color-brand-amber);
+  color: var(--color-brand-amber);
+  background-color: rgba(232, 160, 32, 0.08);
+}
+
+/* =============================================================================
+   LK-SECTION-HEAD — шапка секции дашборда
+   ============================================================================= */
+.lk-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.lk-section-head__label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-brand-amber);
+}
+
+.lk-section-head__link {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.lk-section-head__link:hover {
+  color: var(--color-brand-amber);
+  border-color: var(--color-brand-amber);
+}
+
+.lk-dashboard__section {
+  background-color: var(--color-brand-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px 20px 16px;
+}
+
+/* =============================================================================
+   LK-ORDER-CARD — карточка заказа
+   ============================================================================= */
+.lk-order-card {
+  background-color: var(--color-brand-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.lk-order-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  border-color: rgba(232, 160, 32, 0.3);
+}
+
+/* Хедер */
+.lk-order-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: var(--color-bg-light);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.lk-order-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lk-order-card__number {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-brand-navy);
+}
+
+.lk-order-card__date {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.lk-order-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ── Статус заказа ─────────────────────────────────────────────────────────── */
+.lk-order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.lk-order-status--new       { background-color: rgba(232, 160, 32, 0.12); color: var(--color-brand-amber); }
+.lk-order-status--paid      { background-color: rgba(46, 213, 115, 0.12); color: #27ae60; }
+.lk-order-status--assembly  { background-color: rgba(52, 152, 219, 0.12); color: #2980b9; }
+.lk-order-status--delivered { background-color: rgba(52, 152, 219, 0.18); color: #1a6fa8; }
+.lk-order-status--complete  { background-color: rgba(46, 213, 115, 0.2);  color: #1e8449; }
+.lk-order-status--cancelled { background-color: rgba(231, 76, 60, 0.1);   color: var(--color-danger); }
+
+/* Бейдж «Оплачен» */
+.lk-order-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lk-order-badge--paid {
+  background-color: rgba(46, 213, 115, 0.15);
+  color: #27ae60;
+}
+
+/* Товары заказа */
+.lk-order-card__items {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lk-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lk-order-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lk-order-item__name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-brand-navy);
+  min-width: 120px;
+  line-height: 1.4;
+}
+
+.lk-order-item__props {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  flex-basis: 100%;
+}
+
+.lk-order-item__qty {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.lk-order-item__price {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand-navy);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.lk-order-items__more {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Футер */
+.lk-order-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.lk-order-card__total {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.lk-order-card__total-price {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  color: var(--color-brand-navy);
+  font-size: 15px;
+}
+
+.lk-order-card__delivery {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.lk-order-card__btn {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* =============================================================================
+   LK-ORDERS — страница списка заказов
+   ============================================================================= */
+.lk-orders__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Фильтр статусов */
+.lk-order-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.lk-order-filter__btn {
+  padding: 6px 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  white-space: nowrap;
+}
+
+.lk-order-filter__btn:hover {
+  border-color: var(--color-brand-amber);
+  color: var(--color-brand-amber);
+}
+
+.lk-order-filter__btn--active {
+  background-color: var(--color-brand-amber);
+  border-color: var(--color-brand-amber);
+  color: var(--color-brand-white);
+}
+
+/* =============================================================================
+   LK-WISHLIST-PREVIEW — избранное на дашборде
+   ============================================================================= */
+.lk-wishlist-preview__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lk-wishlist-item__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.lk-wishlist-item__link:hover {
+  opacity: 0.8;
+}
+
+.lk-wishlist-item__img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-light);
+  display: block;
+}
+
+.lk-wishlist-item__name {
+  font-size: 11px;
+  color: var(--color-brand-navy);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* =============================================================================
+   LK-ADDRESSES — адреса доставки
+   ============================================================================= */
+.lk-address-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lk-address-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background-color: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
+}
+
+.lk-address-item:hover {
+  border-color: rgba(232, 160, 32, 0.3);
+}
+
+.lk-address-item__name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-brand-navy);
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.lk-address-item__delete {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease, background-color 0.2s ease;
+  padding: 0;
+}
+
+.lk-address-item__delete:hover {
+  color: var(--color-danger);
+  background-color: rgba(231, 76, 60, 0.08);
+}
+
+.lk-addresses__empty {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0 0 12px;
+  font-style: italic;
+}
+
+.lk-address-add {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.lk-address-add__btn {
+  align-self: flex-start;
+}
+
+/* =============================================================================
+   LK-PROFILE — форма профиля
+   ============================================================================= */
+.lk-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Сообщения */
+.lk-form-message {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.lk-form-message--success {
+  background-color: rgba(46, 213, 115, 0.1);
+  border: 1px solid rgba(46, 213, 115, 0.3);
+  color: #1e8449;
+}
+
+.lk-form-message--error {
+  background-color: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.25);
+  color: var(--color-danger);
+}
+
+.lk-form-message__text {
+  margin: 0 0 4px;
+}
+
+.lk-form-message__text:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Секция (fieldset) ─────────────────────────────────────────────────────── */
+.lk-form-section {
+  background-color: var(--color-brand-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lk-form-section__title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-brand-navy);
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--color-border);
+  margin: 0;
+  display: block;
+  line-height: 1;
+}
+
+.lk-form-section__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.lk-form-section__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border);
+}
+
+.lk-form-section__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── Поле формы ────────────────────────────────────────────────────────────── */
+.lk-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lk-form-field__label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.lk-form-field__input,
+.lk-form-field__select,
+.lk-form-field__textarea {
+  padding: 10px 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-brand-navy);
+  background-color: var(--color-bg-light);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  width: 100%;
+  appearance: none;
+}
+
+.lk-form-field__input::placeholder,
+.lk-form-field__textarea::placeholder {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.lk-form-field__input:focus,
+.lk-form-field__select:focus,
+.lk-form-field__textarea:focus {
+  border-color: var(--color-brand-amber);
+  box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.15);
+  background-color: var(--color-brand-white);
+}
+
+.lk-form-field--error .lk-form-field__input {
+  border-color: var(--color-danger);
+  background-color: rgba(231, 76, 60, 0.04);
+}
+
+.lk-form-field__error {
+  font-size: 11px;
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.lk-profile__logout-all {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.lk-profile__logout-all:hover {
+  color: var(--color-danger);
+}
+
+/* =============================================================================
+   LK-NOTIFICATIONS — уведомления + тоггл
+   ============================================================================= */
+.lk-notifications {
+  display: flex;
+  flex-direction: column;
+}
+
+.lk-notifications-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lk-notifications-sub:last-child {
+  border-bottom: none;
+}
+
+.lk-notifications-sub__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lk-notifications-sub__title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand-navy);
+  line-height: 1.3;
+}
+
+.lk-notifications-sub__desc {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* Telegram-подключение в уведомлениях */
+.lk-notifications-sub--tg .lk-notifications-sub__desc[data-tg-status] {
+  font-weight: 600;
+}
+
+/* ── Toggle-переключатель ──────────────────────────────────────────────────── */
+.lk-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.lk-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.lk-toggle__track {
+  display: block;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: var(--color-border);
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.lk-toggle__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--color-brand-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.lk-toggle__input:checked + .lk-toggle__track {
+  background-color: var(--color-brand-amber);
+}
+
+.lk-toggle__input:checked + .lk-toggle__track::after {
+  transform: translateX(20px);
+}
+
+.lk-toggle__input:focus-visible + .lk-toggle__track {
+  box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.3);
+}
+
+/* =============================================================================
+   LK-TG-NOTIFY — Telegram на дашборде
+   ============================================================================= */
+.lk-tg-notify__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lk-tg-notify__text {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 380px;
+}
+
+/* Telegram-кнопка */
+.btn--tg {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-brand-white);
+  background-color: #29A8E8;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn--tg:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn--tg:active {
+  transform: translateY(0);
+}
+
+.lk-tg-notify__icon {
+  fill: var(--color-brand-white);
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   LK-EMPTY-STATE — пустое состояние
+   ============================================================================= */
+.lk-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: var(--color-brand-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.lk-empty-state__icon {
+  color: var(--color-border);
+}
+
+.lk-empty-state__text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.lk-empty-state__btn {
+  margin-top: 4px;
+}
+
+/* =============================================================================
+   BTN--GHOST-SMALL — кнопка-призрак маленькая (используется в ЛК)
+   ============================================================================= */
+.btn--ghost-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.btn--ghost-small:hover {
+  border-color: var(--color-brand-amber);
+  color: var(--color-brand-amber);
+}
+
+/* =============================================================================
+   RESPONSIVE — Tablet (≤ 1024px)
+   ============================================================================= */
+@media (max-width: 1024px) {
+  .lk-layout {
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+  }
+
+  .lk-form-section__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lk-greeting {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — Mobile (≤ 768px)
+   Сайдбар → горизонтальная полоса с прокруткой
+   ============================================================================= */
+@media (max-width: 768px) {
+  .lk-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 16px 0 40px;
+  }
+
+  /* Sidebar → горизонтальная полоса */
+  .lk-sidebar {
+    position: static;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    margin-bottom: 20px;
+  }
+
+  .lk-sidebar__user {
+    display: none;
+  }
+
+  /* Навигация — горизонтальный скролл */
+  .lk-nav {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lk-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lk-nav__item {
+    flex-shrink: 0;
+  }
+
+  .lk-nav__link {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    font-size: 11px;
+    text-align: center;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .lk-nav__link--active,
+  .lk-nav__item--active .lk-nav__link {
+    border-left-color: transparent;
+    border-bottom-color: var(--color-brand-amber);
+    background-color: rgba(232, 160, 32, 0.06);
+  }
+
+  .lk-nav__badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    margin-left: 0;
+    font-size: 9px;
+    min-width: 16px;
+    height: 16px;
+  }
+
+  .lk-nav__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lk-nav__sep {
+    display: none;
+  }
+
+  /* Контент */
+  .lk-content {
+    gap: 14px;
+  }
+
+  .lk-greeting {
+    padding: 20px 16px;
+  }
+
+  .lk-greeting__name {
+    font-size: 18px;
+  }
+
+  .lk-form-section {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .lk-order-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .lk-order-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .lk-order-card__btn {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Фильтр статусов — горизонтальный скролл */
+  .lk-order-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .lk-order-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lk-order-filter__btn {
+    flex-shrink: 0;
+  }
+
+  .lk-wishlist-preview__list {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  }
+
+  .lk-wishlist-item__img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .lk-tg-notify__body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn--tg {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — Small Mobile (≤ 480px)
+   ============================================================================= */
+@media (max-width: 480px) {
+  .lk-order-item {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .lk-order-item__price {
+    margin-left: 0;
+  }
+
+  .lk-form-section__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lk-form-section__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lk-greeting__actions {
+    width: 100%;
+  }
+
+  .lk-greeting__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .lk-page-head__title {
+    font-size: 16px;
+  }
+
+  .lk-dashboard__section {
+    padding: 14px 14px 12px;
+  }
+}
