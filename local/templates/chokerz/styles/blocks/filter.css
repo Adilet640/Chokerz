@@ -1,0 +1,719 @@
+/* =============================================================================
+   filter.css — Умный фильтр каталога CHOKERZ
+   BEM: .catalog-filter, .catalog-filter__group,
+        .catalog-filter__checkboxes, .catalog-filter__color-list,
+        .catalog-filter__range, .price-filter, .form-field
+   ============================================================================= */
+
+/* =============================================================================
+   CATALOG-FILTER — обёртка (сайдбар)
+   ============================================================================= */
+.catalog-filter {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* ── Шапка фильтра ─────────────────────────────────────────────────────────── */
+.catalog-filter__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-light);
+  flex-shrink: 0;
+}
+
+.catalog-filter__title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-brand-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Счётчик активных фильтров */
+.catalog-filter__counter {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-white);
+  background-color: var(--color-brand-amber);
+  padding: 3px 9px;
+  border-radius: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.catalog-filter__counter--empty {
+  display: none;
+}
+
+/* Кнопка «Сбросить» в шапке (старый шаблон) */
+.catalog-filter__reset {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: color 0.2s ease;
+  padding: 2px 4px;
+}
+
+.catalog-filter__reset:hover {
+  color: var(--color-brand-amber);
+}
+
+/* ── Форма ─────────────────────────────────────────────────────────────────── */
+.catalog-filter__form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Список групп ──────────────────────────────────────────────────────────── */
+.catalog-filter__groups {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* =============================================================================
+   CATALOG-FILTER__GROUP — группа фильтра (аккордеон)
+   ============================================================================= */
+.catalog-filter__group {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.catalog-filter__group:last-child {
+  border-bottom: none;
+}
+
+/* ── Кнопка-заголовок группы ──────────────────────────────────────────────── */
+.catalog-filter__group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.catalog-filter__group-toggle:hover {
+  background-color: var(--color-bg-light);
+}
+
+.catalog-filter__group-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand-navy);
+  letter-spacing: 0.02em;
+  flex: 1;
+  text-align: left;
+}
+
+/* Подсветка группы с активным значением */
+.catalog-filter__group--active .catalog-filter__group-name {
+  color: var(--color-brand-amber);
+}
+
+/* Шеврон — вращается при open/close */
+.catalog-filter__group-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.catalog-filter__group--open .catalog-filter__group-chevron,
+.catalog-filter__group-toggle[aria-expanded="true"] .catalog-filter__group-chevron {
+  transform: rotate(180deg);
+}
+
+.catalog-filter__group--active .catalog-filter__group-chevron {
+  color: var(--color-brand-amber);
+}
+
+/* ── Тело группы ───────────────────────────────────────────────────────────── */
+.catalog-filter__group-body {
+  padding: 4px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* hidden-атрибут — скрытый аккордеон (Bitrix использует attr hidden) */
+.catalog-filter__group-body[hidden] {
+  display: none;
+}
+
+/* =============================================================================
+   CHECKBOXES — обычный список значений (материал, размер и т.д.)
+   ============================================================================= */
+.catalog-filter__checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Элемент чекбокса ─────────────────────────────────────────────────────── */
+.catalog-filter__checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.catalog-filter__checkbox-item:hover {
+  background-color: var(--color-bg-light);
+}
+
+.catalog-filter__checkbox-item--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.catalog-filter__checkbox-item--checked .catalog-filter__checkbox-label {
+  color: var(--color-brand-navy);
+  font-weight: 600;
+}
+
+/* Скрытый нативный input */
+.catalog-filter__checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Кастомная «галочка» */
+.catalog-filter__checkbox-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border);
+  border-radius: 3px;
+  background-color: var(--color-white);
+  color: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.catalog-filter__checkbox-input:checked + .catalog-filter__checkbox-mark {
+  background-color: var(--color-brand-amber);
+  border-color: var(--color-brand-amber);
+  color: var(--color-white);
+}
+
+.catalog-filter__checkbox-input:focus-visible + .catalog-filter__checkbox-mark {
+  box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.3);
+}
+
+/* SVG-галочка внутри */
+.catalog-filter__checkbox-check {
+  display: block;
+  width: 10px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+/* Текст */
+.catalog-filter__checkbox-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.4;
+  user-select: none;
+}
+
+/* Счётчик товаров */
+.catalog-filter__checkbox-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-light);
+  padding: 1px 6px;
+  border-radius: 10px;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   COLOR-LIST — кружки цветов
+   ============================================================================= */
+.catalog-filter__color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+/* ── Элемент (label-обёртка) ──────────────────────────────────────────────── */
+.catalog-filter__color-item {
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.catalog-filter__color-item:focus-within {
+  outline: none;
+}
+
+/* Скрытый input */
+.catalog-filter__color-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Цветной кружок — цвет устанавливается через CSS custom property из style="--color-value: #hex" */
+.catalog-filter__color-swatch {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-value, #ccc);
+  border: 2px solid var(--color-border);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catalog-filter__color-item:hover .catalog-filter__color-swatch {
+  transform: scale(1.15);
+  border-color: var(--color-text-muted);
+}
+
+.catalog-filter__color-input:checked ~ .catalog-filter__color-swatch,
+.catalog-filter__color-item--checked .catalog-filter__color-swatch {
+  border-color: var(--color-brand-amber);
+  box-shadow: 0 0 0 2px var(--color-brand-amber);
+  transform: scale(1.1);
+}
+
+.catalog-filter__color-input:focus-visible ~ .catalog-filter__color-swatch {
+  box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.35);
+}
+
+/* Старый шаблон: .color-swatch (template (2).php) */
+.color-swatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+}
+
+.color-swatch:hover {
+  background-color: var(--color-bg-light);
+}
+
+.color-swatch__input {
+  /* visually-hidden */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.color-swatch__dot {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.color-swatch--active .color-swatch__dot,
+.color-swatch__input:checked + .color-swatch__dot {
+  border-color: var(--color-brand-amber);
+  box-shadow: 0 0 0 2px var(--color-brand-amber);
+  transform: scale(1.1);
+}
+
+.color-swatch__label {
+  font-size: 12px;
+  color: var(--color-text);
+  font-weight: 500;
+  user-select: none;
+}
+
+/* =============================================================================
+   RANGE — диапазон цен (template__1_.php: .catalog-filter__range)
+   ============================================================================= */
+.catalog-filter__range {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.catalog-filter__range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalog-filter__range-divider {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ── form-field ────────────────────────────────────────────────────────────── */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.form-field--inline {
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.form-field__label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.form-field__input {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-brand-navy);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  /* Убираем стрелки number */
+  -moz-appearance: textfield;
+}
+
+.form-field__input::-webkit-outer-spin-button,
+.form-field__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-field__input:focus {
+  border-color: var(--color-brand-amber);
+  box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.15);
+}
+
+.form-field__input--small {
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.form-field__label--small {
+  font-size: 10px;
+}
+
+/* =============================================================================
+   PRICE-FILTER — слайдер диапазона цен (template (2).php)
+   ============================================================================= */
+.price-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.price-filter__inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-filter__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  background-color: var(--color-bg-light);
+  transition: border-color 0.2s ease;
+}
+
+.price-filter__input-wrap:focus-within {
+  border-color: var(--color-brand-amber);
+  background-color: var(--color-white);
+}
+
+.price-filter__input-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.price-filter__input {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand-navy);
+  background: transparent;
+  border: none;
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: none;
+  text-align: right;
+}
+
+.price-filter__input::-webkit-outer-spin-button,
+.price-filter__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.price-filter__currency {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.price-filter__sep {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+/* ── Слайдер (двойной) ─────────────────────────────────────────────────────── */
+.price-filter__slider {
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.price-filter__track {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 2px;
+}
+
+.price-filter__range {
+  position: absolute;
+  height: 100%;
+  background-color: var(--color-brand-amber);
+  border-radius: 2px;
+  /* width / left устанавливаются через JS */
+}
+
+.price-filter__handle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  border: 2px solid var(--color-brand-amber);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  transform: translateX(-50%);
+  z-index: 2;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+  touch-action: none;
+}
+
+.price-filter__handle:hover,
+.price-filter__handle:focus-visible {
+  box-shadow: 0 0 0 4px rgba(232, 160, 32, 0.25), 0 1px 4px rgba(0, 0, 0, 0.15);
+  outline: none;
+}
+
+.price-filter__handle:active {
+  cursor: grabbing;
+  transform: translateX(-50%) scale(1.15);
+}
+
+/* =============================================================================
+   CATALOG-FILTER__FOOTER — кнопки «Сбросить» / «Применить»
+   ============================================================================= */
+.catalog-filter__footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-light);
+  flex-shrink: 0;
+}
+
+/* Кнопки используют глобальный .btn из catalog.css */
+.catalog-filter__btn-reset {
+  border: 1px solid var(--color-border);
+}
+
+.catalog-filter__btn-apply {
+  /* .btn--primary из catalog.css */
+}
+
+/* Кнопки в нижней части старого шаблона */
+.catalog-filter__actions {
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-light);
+}
+
+.catalog-filter__submit-count {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+/* =============================================================================
+   MOBILE DRAWER OVERLAY — тёмный слой за фильтром
+   ============================================================================= */
+.catalog-filter-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 399;
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color 0.3s ease;
+  pointer-events: none;
+}
+
+.catalog-filter-overlay--visible {
+  display: block;
+  pointer-events: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ── Мобильная шапка drawer с кнопкой «Закрыть» (добавляется JS) ─────────── */
+.catalog-filter__drawer-header {
+  display: none;
+}
+
+/* =============================================================================
+   RESPONSIVE — Mobile (≤ 900px)
+   ============================================================================= */
+@media (max-width: 900px) {
+  .catalog-filter {
+    border-radius: 0;
+    border: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Шапка drawer с кнопкой закрыть */
+  .catalog-filter__header {
+    padding: 16px 20px;
+  }
+
+  /* Группы — все раскрыты первые N, остальные закрыты — стандартное поведение */
+  .catalog-filter__group-toggle {
+    padding: 14px 20px;
+  }
+
+  .catalog-filter__group-body {
+    padding: 4px 20px 16px;
+  }
+
+  .catalog-filter__footer {
+    padding: 16px 20px;
+    position: sticky;
+    bottom: 0;
+  }
+
+  .catalog-filter__actions {
+    padding: 16px 20px;
+    position: sticky;
+    bottom: 0;
+  }
+
+  /* drawer header кнопка закрыть (добавляется JS) */
+  .catalog-filter__drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--color-bg-light);
+    color: var(--color-brand-navy);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+  }
+
+  .catalog-filter__drawer-close:hover {
+    background-color: var(--color-border);
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE — Small Mobile (≤ 480px)
+   ============================================================================= */
+@media (max-width: 480px) {
+  .catalog-filter__color-list {
+    gap: 6px;
+  }
+
+  .catalog-filter__color-swatch {
+    width: 22px;
+    height: 22px;
+  }
+
+  .price-filter__input-wrap {
+    padding: 5px 7px;
+  }
+
+  .price-filter__input {
+    font-size: 12px;
+  }
+}
