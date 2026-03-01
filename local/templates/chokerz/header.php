@@ -1,15 +1,4 @@
 <?php
-/**
- * Header шаблона сайта CHOKERZ
- *
- * Структура:
- *   .header-top       — информационная строка (контакт + соцсети)
- *   .header           — основная шапка (логотип + навигация + действия)
- *   .header-mobile    — мобильное меню (drawer)
- *
- * @package chokerz
- * @since   1.0.0
- */
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
@@ -20,7 +9,7 @@ use Bitrix\Main\Application;
 use Bitrix\Sale\Basket;
 use Bitrix\Main\Loader;
 
-// ── Подключение стилей и скриптов ────────────────────────────────────────────
+
 $asset = Asset::getInstance();
 $asset->addCss(SITE_TEMPLATE_PATH . '/styles/main.css');
 $asset->addJs(SITE_TEMPLATE_PATH . '/js/main.js', true); // defer через параметр
@@ -32,7 +21,7 @@ if (Loader::includeModule('sale')) {
     $cartCount = (int) \CSaleBasket::GetBasketItemsCount($fUserId, SITE_ID);
 }
 
-// ── Текущий URL для подсветки активного пункта меню ──────────────────────────
+
 $curPageDir = Application::getInstance()->getContext()->getRequest()->getRequestedPage();
 
 /**
@@ -77,6 +66,10 @@ function chkNavActive(string $path, string $curDir): string
     <meta property="og:locale"      content="ru_RU">
 
     <?php $APPLICATION->ShowHead() ?>
+<!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Spectral:ital,wght@0,400;0,600;1,400&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 </head>
 <body class="body<?= ($APPLICATION->GetProperty('body_class') ? ' ' . htmlspecialcharsbx($APPLICATION->GetProperty('body_class')) : '') ?>">
 
