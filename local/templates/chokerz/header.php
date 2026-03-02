@@ -70,6 +70,29 @@ function chkNavActive(string $path, string $curDir): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Spectral:ital,wght@0,400;0,600;1,400&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+    <!-- Base -->
+<link rel="stylesheet" href="/local/templates/chokerz/styles/base/variables.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/base/typography.css">
+
+<!-- Layout -->
+<link rel="stylesheet" href="/local/templates/chokerz/styles/layout/header.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/layout/footer.css">
+
+<!-- Blocks -->
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/hero.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/advantages.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/products.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/subscribe.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/catalog.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/filter.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/card.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/product-detail.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/checkout.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/lk.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/blog.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/modal.css">
+<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/search.css">
 </head>
 <body class="body<?= ($APPLICATION->GetProperty('body_class') ? ' ' . htmlspecialcharsbx($APPLICATION->GetProperty('body_class')) : '') ?>">
 
