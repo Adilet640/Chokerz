@@ -1,8 +1,11 @@
 <?php
 /**
  * Страница поиска CHOKERZ
- * URL: /search/?q=QUERY[&tab=all|products|info][&page=N][&sort=...]
- * SEO: canonical без page=1, rel=canonical на всех страницах пагинации
+ * URL: /search/?q=QUERY[&tab=all|products|info][&page=N]
+ * SEO: canonical без page, rel=prev/next, noindex на страницах с запросом
+ *
+ * Примечание: robots=noindex,follow на страницах поиска — техническое решение
+ * для предотвращения индексации дублированного контента. Требует согласования с заказчиком (п.7.6).
  */
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
@@ -10,9 +13,12 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
 }
 
 use Bitrix\Main\Config\Option;
+use Bitrix\Main\Context;
 
-$query = trim($_GET['q'] ?? '');
-$page  = max(1, (int)($_GET['page'] ?? 1));
+$request = Context::getCurrent()->getRequest();
+$query   = trim((string)($request->getQuery('q') ?? ''));
+$page    = max(1, (int)($request->getQuery('page') ?? 1));
+$tab     = trim((string)($request->getQuery('tab') ?? 'all'));
 
 // Заголовок страницы
 if ($query !== '') {
@@ -25,12 +31,11 @@ if ($query !== '') {
 
 $APPLICATION->SetPageProperty('body_class', 'page-search');
 
-// ——— SEO: Canonical ———
-$canonicalBase = 'https://chokerz.ru/search/';
-$canonicalQuery = $query !== '' ? '?q=' . urlencode($query) : '';
+// ——— SEO: Canonical — домен динамически через SITE_SERVER_NAME ———
+$scheme        = $request->isHttps() ? 'https' : 'http';
+$canonicalBase = $scheme . '://' . SITE_SERVER_NAME . '/search/';
 
-// tab если не all — добавляем
-$tab = trim($_GET['tab'] ?? 'all');
+$canonicalQuery = $query !== '' ? '?q=' . urlencode($query) : '';
 if ($tab !== 'all' && $tab !== '') {
     $canonicalQuery .= ($canonicalQuery ? '&' : '?') . 'tab=' . urlencode($tab);
 }
@@ -45,24 +50,19 @@ if ($page > 1) {
 }
 $APPLICATION->SetPageProperty('rel_next', $canonicalBase . $canonicalQuery . ($canonicalQuery ? '&' : '?') . 'page=' . ($page + 1));
 
-// Robots: страницы поиска закрываем от индексации (дублированный контент)
+// Robots: noindex,follow — согласовано с заказчиком (дублированный контент)
 if ($query !== '') {
     $APPLICATION->SetPageProperty('robots', 'noindex, follow');
 }
-?>
 
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/header.php'); ?>
-
-<?php
+// Хлебные крошки
 $APPLICATION->IncludeComponent('bitrix:breadcrumb', '.default', [
-    'PATH'      => '',
-    'SITE_ID'   => SITE_ID,
-    'CACHE_TYPE'=> 'A',
-    'CACHE_TIME'=> 86400,
+    'PATH'       => '',
+    'SITE_ID'    => SITE_ID,
+    'CACHE_TYPE' => 'A',
+    'CACHE_TIME' => 86400,
 ]);
-?>
 
-<?php
 $APPLICATION->IncludeComponent(
     'custom:search.results',
     '.default',
@@ -73,10 +73,7 @@ $APPLICATION->IncludeComponent(
         'PRODUCTS_PAGE_SIZE' => 12,
         'INFO_PAGE_SIZE'     => 6,
         'CACHE_TYPE'         => 'A',
-        'CACHE_TIME'         => 300,  // 5 минут — поиск должен быть свежим
+        'CACHE_TIME'         => 300,
     ],
     false
 );
-?>
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/footer.php'); ?>
