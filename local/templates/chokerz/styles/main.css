@@ -3,19 +3,19 @@
    Основной файл стилей
    ======================================== */
 
-/* Импорты базовых стилей */
+/* Базовые стили */
 @import 'base/variables.css';
 @import 'base/reset.css';
 @import 'base/base.css';
 @import 'base/typography.css';
 
-/* Импорты макета */
+/* Макет */
 @import 'layout/container.css';
 @import 'layout/grid.css';
 @import 'layout/header.css';
 @import 'layout/footer.css';
 
-/* Импорты блоков */
+/* Блоки */
 @import 'blocks/button.css';
 @import 'blocks/form.css';
 @import 'blocks/card.css';
@@ -23,10 +23,14 @@
 @import 'blocks/search.css';
 @import 'blocks/breadcrumbs.css';
 @import 'blocks/pagination.css';
-
-/* ========================================
-   Временный контент для демонстрации
-   ======================================== */
-
-/* Скрываем импорты, которых еще нет */
-/* Для быстрой проверки шаблона */
+@import 'blocks/hero.css';
+@import 'blocks/advantages.css';
+@import 'blocks/products.css';
+@import 'blocks/subscribe.css';
+@import 'blocks/catalog.css';
+@import 'blocks/filter.css';
+@import 'blocks/product-detail.css';
+@import 'blocks/checkout.css';
+@import 'blocks/lk.css';
+@import 'blocks/blog.css';
+@import 'blocks/modal.css';
