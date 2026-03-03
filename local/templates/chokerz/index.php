@@ -1,8 +1,5 @@
 <?php
-/**
- * Главная страница сайта CHOKERZ
- * Основной шаблон главной страницы
- */
+
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) {
     die();
@@ -16,7 +13,7 @@ $APPLICATION->SetPageProperty("body_class", "page-home");
 
 <?php require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php"); ?>
 
-<!-- Герой-секция -->
+
 <section class="hero">
     <div class="hero__container container">
         <div class="hero__content">
@@ -30,7 +27,7 @@ $APPLICATION->SetPageProperty("body_class", "page-home");
     </div>
 </section>
 
-<!-- Преимущества -->
+
 <section class="advantages section">
     <div class="advantages__container container">
         <h2 class="advantages__title section-title">Почему выбирают нас</h2>
@@ -79,7 +76,7 @@ $APPLICATION->SetPageProperty("body_class", "page-home");
     </div>
 </section>
 
-<!-- Хиты продаж -->
+
 <section class="products-hit section">
     <div class="products-hit__container container">
         <div class="products-hit__header section-header">
@@ -154,7 +151,7 @@ $APPLICATION->SetPageProperty("body_class", "page-home");
     </div>
 </section>
 
-<!-- Новинки -->
+
 <section class="products-new section">
     <div class="products-new__container container">
         <div class="products-new__header section-header">
@@ -228,7 +225,7 @@ $APPLICATION->SetPageProperty("body_class", "page-home");
     </div>
 </section>
 
-<!-- Блог -->
+
 <section class="blog section">
     <div class="blog__container container">
         <div class="blog__header section-header">
@@ -280,7 +277,7 @@ $APPLICATION->SetPageProperty("body_class", "page-home");
     </div>
 </section>
 
-<!-- Форма подписки -->
+
 <section class="subscribe section">
     <div class="subscribe__container container">
         <div class="subscribe__content">
