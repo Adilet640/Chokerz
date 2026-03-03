@@ -2,27 +2,31 @@
 /**
  * Главная страница личного кабинета CHOKERZ
  * URL: /personal/
- * Шаблон: с двухколоночным layout (сайдбар + контент)
+ * Шаблон: двухколоночный layout (сайдбар + контент)
  */
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
-use Bitrix\Main\Loader;
+use Bitrix\Main\Context;
+use Bitrix\Main\Config\Option;
+
+// Редирект неавторизованных — D7 API (CUser запрещён, п.10.2)
+$currentUser = Context::getCurrent()->getUser();
+if (!$currentUser || !$currentUser->isAuthorized()) {
+    LocalRedirect(SITE_DIR . 'personal/login/?back_url=' . urlencode($_SERVER['REQUEST_URI']));
+}
 
 $APPLICATION->SetTitle('Личный кабинет');
-$APPLICATION->SetPageProperty('body_class', 'page-lk');
 $APPLICATION->SetPageProperty('description', 'Личный кабинет CHOKERZ — управление заказами, избранным и профилем.');
+$APPLICATION->SetPageProperty('body_class', 'page-lk');
 ?>
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/header.php'); ?>
 
 <div class="lk-layout">
     <div class="lk-layout__container container">
 
         <?php
-        // Сайдбар — навигация ЛК
         $APPLICATION->IncludeFile(
             SITE_TEMPLATE_PATH . '/includes/lk/sidebar.php',
             [],
@@ -37,11 +41,11 @@ $APPLICATION->SetPageProperty('description', 'Личный кабинет CHOKER
                 'custom:lk.dashboard',
                 '.default',
                 [
-                    'IBLOCK_ID'             => \Bitrix\Main\Config\Option::get('chokerz', 'catalog_iblock_id', 0),
-                    'WISHLIST_HL_CODE'      => 'Wishlist',
+                    'IBLOCK_ID'              => Option::get('chokerz', 'catalog_iblock_id', 0),
+                    'WISHLIST_HL_CODE'       => 'Wishlist',
                     'WISHLIST_PREVIEW_COUNT' => 3,
-                    'CACHE_TYPE'            => 'A',
-                    'CACHE_TIME'            => 600,
+                    'CACHE_TYPE'             => 'A',
+                    'CACHE_TIME'             => 600,
                 ],
                 false
             );
@@ -51,5 +55,3 @@ $APPLICATION->SetPageProperty('description', 'Личный кабинет CHOKER
 
     </div><!-- /lk-layout__container -->
 </div><!-- /lk-layout -->
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/footer.php'); ?>
