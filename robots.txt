@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /bitrix/
+Disallow: /local/
+Disallow: /upload/tmp/
+Disallow: /personal/
+Disallow: /cart/
+Disallow: /order/
+Disallow: /ajax/
+Allow: /
+
+Sitemap: https://chokerz.ru/sitemap.xml
