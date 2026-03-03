@@ -1,222 +1,173 @@
 /**
- * Модуль избранного (Wishlist)
- * 
- * @package CHOKERZ
- * @version 1.0.0
+ * Wishlist — модуль избранного
+ *
+ * @project CHOKERZ
+ * @version 2.1
+ *
+ * Разметка корневого элемента (передаёт конфиг без window.*):
+ *   <div data-wishlist-root
+ *        data-ajax-url="/local/ajax/wishlist.php"
+ *        data-debug="false">…</div>
+ *
+ * Кнопка-триггер:
+ *   <button
+ *     type="button"
+ *     data-action="wishlist"
+ *     data-product-id="123"
+ *     aria-pressed="false"
+ *     title="Добавить в избранное">…</button>
+ *
+ * Счётчик в шапке:
+ *   <span data-wishlist-count hidden>0</span>
+ *
+ * sessid передаётся через скрытый input (добавить в шаблон header.php):
+ *   <input type="hidden" name="sessid" value="<?= bitrix_sessid() ?>">
  */
 
+'use strict';
+
 class Wishlist {
-    constructor() {
-        this.wishlistBtns = null;
-        this.wishlistCountEl = null;
-        this.wishlistItems = [];
-        this.initComplete = false;
+    /**
+     * @param {object}  opts
+     * @param {string}  opts.ajaxUrl  — путь к обработчику (из data-атрибута)
+     * @param {boolean} opts.debug    — включить console.*
+     */
+    constructor({ ajaxUrl, debug = false } = {}) {
+        this._ajaxUrl = ajaxUrl;
+        this._debug   = debug;
+        this._ids     = new Set();
+        this._countEl = null;
     }
 
-    /**
-     * Инициализация модуля
-     */
-    init() {
-        this.wishlistBtns = document.querySelectorAll('[data-wishlist-toggle]');
-        this.wishlistCountEl = document.querySelector('[data-wishlist-count]');
+    // ── Публичное API ─────────────────────────────────────────────────────────
 
-        // Загрузка данных из localStorage
-        this.loadWishlist();
+    async init() {
+        this._countEl = document.querySelector('[data-wishlist-count]');
 
-        if (this.wishlistBtns.length > 0) {
-            this.bindEvents();
+        document.addEventListener('click', this._handleClick.bind(this));
+
+        try {
+            const data = await this._post({ action: 'list' });
+            if (data.success) {
+                this._syncState(data.product_ids ?? [], data.count ?? 0);
+            }
+        } catch (e) {
+            this._log('warn', 'не удалось загрузить список', e);
         }
-
-        this.updateWishlistCount();
-        this.initComplete = true;
-
-        console.log('CHOKERZ: Избранное инициализировано');
 
         return this;
     }
 
-    /**
-     * Привязка событий
-     */
-    bindEvents() {
-        // Переключение товара в избранном
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('[data-wishlist-toggle]')) {
-                e.preventDefault();
-                const btn = e.target.closest('[data-wishlist-toggle]');
-                const productId = btn.dataset.productId;
-                const productName = btn.dataset.productName || 'Товар';
-                const productPrice = parseFloat(btn.dataset.productPrice) || 0;
-                const productImage = btn.dataset.productImage || '';
+    // ── Обработчик клика (делегированный) ────────────────────────────────────
 
-                this.toggleItem({
-                    id: productId,
-                    name: productName,
-                    price: productPrice,
-                    image: productImage
-                }, btn);
+    async _handleClick(e) {
+        const btn = e.target.closest('[data-action="wishlist"]');
+        if (!btn) return;
+
+        e.preventDefault();
+
+        const productId = btn.dataset.productId;
+        if (!productId) return;
+
+        // Оптимистичное обновление
+        const wasActive = this._ids.has(productId);
+        this._setButtonActive(btn, !wasActive);
+        wasActive ? this._ids.delete(productId) : this._ids.add(productId);
+        this._renderCount(this._ids.size);
+
+        try {
+            const data = await this._post({ action: 'toggle', productId });
+
+            if (!data.success) {
+                // Откат
+                this._setButtonActive(btn, wasActive);
+                wasActive ? this._ids.add(productId) : this._ids.delete(productId);
+                this._renderCount(this._ids.size);
+                this._log('error', 'ошибка сервера:', data.message);
+                return;
             }
+
+            this._syncState(data.product_ids ?? [], data.count ?? 0);
+
+        } catch (err) {
+            // Сетевой откат
+            this._setButtonActive(btn, wasActive);
+            wasActive ? this._ids.add(productId) : this._ids.delete(productId);
+            this._renderCount(this._ids.size);
+            this._log('error', 'сетевая ошибка', err);
+        }
+    }
+
+    // ── Вспомогательные методы ────────────────────────────────────────────────
+
+    async _post(params) {
+        const sessid = document.querySelector('input[name="sessid"]')?.value ?? '';
+        const body   = new URLSearchParams({ sessid, ...params });
+
+        const res = await fetch(this._ajaxUrl, {
+            method:      'POST',
+            credentials: 'same-origin',
+            headers:     { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    _syncState(ids, count) {
+        this._ids = new Set(ids.map(String));
+        this._renderCount(count);
+        this._refreshButtons();
+    }
+
+    _renderCount(count) {
+        if (!this._countEl) return;
+        this._countEl.textContent = count;
+        this._countEl.setAttribute('aria-label', `Товаров в избранном: ${count}`);
+        count > 0
+            ? this._countEl.removeAttribute('hidden')
+            : this._countEl.setAttribute('hidden', '');
+    }
+
+    _setButtonActive(btn, isActive) {
+        btn.setAttribute('aria-pressed', String(isActive));
+        btn.classList.toggle('wishlist-btn--active', isActive);
+        btn.title = isActive ? 'Удалить из избранного' : 'Добавить в избранное';
+    }
+
+    _refreshButtons() {
+        document.querySelectorAll('[data-action="wishlist"][data-product-id]').forEach(btn => {
+            this._setButtonActive(btn, this._ids.has(String(btn.dataset.productId)));
         });
     }
 
-    /**
-     * Переключить товар в избранном
-     * @param {Object} item - Товар
-     * @param {Element} btn - Кнопка
-     */
-    toggleItem(item, btn) {
-        const isFavorite = this.isInWishlist(item.id);
-
-        if (isFavorite) {
-            this.removeItem(item.id);
-            this.updateButtonState(btn, false);
-            this.showNotification('Товар удален из избранного', 'warning');
-        } else {
-            this.addItem(item);
-            this.updateButtonState(btn, true);
-            this.showNotification('Товар добавлен в избранное', 'success');
+    /** Логирование — только при debug=true */
+    _log(level, ...args) {
+        if (this._debug) {
+            console[level]('CHOKERZ Wishlist:', ...args);
         }
-    }
-
-    /**
-     * Добавить товар в избранное
-     * @param {Object} item - Товар
-     */
-    addItem(item) {
-        // Проверка на дубликат
-        if (!this.isInWishlist(item.id)) {
-            this.wishlistItems.push(item);
-            this.saveWishlist();
-            this.updateWishlistCount();
-        }
-
-        console.log('CHOKERZ: Товар добавлен в избранное', item);
-    }
-
-    /**
-     * Удалить товар из избранного
-     * @param {string} itemId - ID товара
-     */
-    removeItem(itemId) {
-        this.wishlistItems = this.wishlistItems.filter(item => item.id !== itemId);
-        this.saveWishlist();
-        this.updateWishlistCount();
-
-        // Обновить все кнопки с этим товаром
-        const buttons = document.querySelectorAll(`[data-wishlist-toggle][data-product-id="${itemId}"]`);
-        buttons.forEach(btn => {
-            this.updateButtonState(btn, false);
-        });
-
-        console.log('CHOKERZ: Товар удален из избранного', itemId);
-    }
-
-    /**
-     * Проверить наличие товара в избранном
-     * @param {string} itemId - ID товара
-     * @returns {boolean}
-     */
-    isInWishlist(itemId) {
-        return this.wishlistItems.some(item => item.id === itemId);
-    }
-
-    /**
-     * Обновить состояние кнопки
-     * @param {Element} btn - Кнопка
-     * @param {boolean} isActive - Активна ли
-     */
-    updateButtonState(btn, isActive) {
-        if (isActive) {
-            btn.classList.add('wishlist-btn--active');
-            btn.setAttribute('aria-pressed', 'true');
-            btn.title = 'Удалить из избранного';
-        } else {
-            btn.classList.remove('wishlist-btn--active');
-            btn.setAttribute('aria-pressed', 'false');
-            btn.title = 'Добавить в избранное';
-        }
-    }
-
-    /**
-     * Обновить счетчик избранного
-     */
-    updateWishlistCount() {
-        const count = this.wishlistItems.length;
-
-        if (this.wishlistCountEl) {
-            if (count > 0) {
-                this.wishlistCountEl.textContent = count;
-                this.wishlistCountEl.style.display = 'block';
-            } else {
-                this.wishlistCountEl.style.display = 'none';
-            }
-        }
-    }
-
-    /**
-     * Сохранить избранное в localStorage
-     */
-    saveWishlist() {
-        localStorage.setItem('chokerz_wishlist', JSON.stringify(this.wishlistItems));
-    }
-
-    /**
-     * Загрузить избранное из localStorage
-     */
-    loadWishlist() {
-        const savedWishlist = localStorage.getItem('chokerz_wishlist');
-        
-        if (savedWishlist) {
-            try {
-                this.wishlistItems = JSON.parse(savedWishlist);
-            } catch (e) {
-                console.error('CHOKERZ: Ошибка загрузки избранного', e);
-                this.wishlistItems = [];
-            }
-        }
-    }
-
-    /**
-     * Показать уведомление
-     * @param {string} message - Сообщение
-     * @param {string} type - Тип (success, error, warning)
-     */
-    showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.className = `notification notification--${type}`;
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background-color: ${type === 'success' ? '#28A745' : '#FFC107'};
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-        `;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
-    }
-
-    /**
-     * Проверка инициализации
-     */
-    isInitialized() {
-        return this.initComplete;
     }
 }
 
-// Создание экземпляра и экспорт
-const wishlist = new Wishlist();
+// ── Авто-инициализация — только если есть элементы на странице ────────────────
+function bootWishlist() {
+    const root       = document.querySelector('[data-wishlist-root]');
+    const hasButtons = document.querySelector('[data-action="wishlist"]');
+    const hasCount   = document.querySelector('[data-wishlist-count]');
+
+    if (!root && !hasButtons && !hasCount) return null;
+
+    const ajaxUrl = root?.dataset.ajaxUrl ?? '/local/ajax/wishlist.php';
+    const debug   = root?.dataset.debug === 'true';
+
+    const instance = new Wishlist({ ajaxUrl, debug });
+    instance.init();
+    return instance;
+}
+
+const wishlist = document.readyState === 'loading'
+    ? (() => { document.addEventListener('DOMContentLoaded', bootWishlist); return null; })()
+    : bootWishlist();
 
 export default wishlist;
