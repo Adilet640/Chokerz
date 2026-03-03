@@ -1,255 +1,200 @@
 /**
- * Модуль корзины
- * 
+ * Модуль корзины — CHOKERZ
+ * Состояние только с сервера. Никакого localStorage.
+ *
  * @package CHOKERZ
- * @version 1.0.0
+ * @version 2.0.0
  */
 
-class Cart {
-    constructor() {
-        this.cartBtn = null;
-        this.cartCountEl = null;
-        this.cartItems = [];
-        this.initComplete = false;
+const DEBUG = document.documentElement.dataset.debug !== undefined;
+
+const log  = (...args) => { if (DEBUG) console.log('[CHOKERZ:Cart]', ...args); };
+const warn = (...args) => { if (DEBUG) console.warn('[CHOKERZ:Cart]', ...args); };
+
+// ── Утилиты ──────────────────────────────────────────────────────────────────
+
+/**
+ * Получить значение BX.message('sessid') или мета-тег.
+ * Bitrix выводит sessid в глобальный объект BX через <script> в head.
+ * @returns {string}
+ */
+function getSessid() {
+    if (typeof BX !== 'undefined' && typeof BX.message === 'function') {
+        return BX.message('sessid') || '';
+    }
+    // Запасной вариант — скрытое поле на странице
+    const field = document.querySelector('input[name="sessid"]');
+    return field ? field.value : '';
+}
+
+/**
+ * POST к /local/ajax/cart.php
+ * @param {Object} params
+ * @returns {Promise<Object>}
+ */
+async function apiCall(params) {
+    const body = new URLSearchParams({ sessid: getSessid(), ...params });
+
+    const response = await fetch('/local/ajax/cart.php', {
+        method:  'POST',
+        headers: {
+            'Content-Type':     'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body:    body.toString(),
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
     }
 
-    /**
-     * Инициализация модуля
-     */
-    init() {
-        this.cartBtn = document.querySelector('.actions__btn--cart');
-        this.cartCountEl = document.querySelector('[data-cart-count]');
+    const data = await response.json();
+    log('apiCall ←', params.action, data);
+    return data;
+}
 
-        // Загрузка данных из localStorage
-        this.loadCart();
+// ── Обновление UI ─────────────────────────────────────────────────────────────
 
-        if (this.cartBtn) {
-            this.bindEvents();
-        }
+/**
+ * Применить данные корзины к DOM
+ * @param {{ count: number, total: number, items: Array }} payload
+ */
+function applyCartState({ count = 0 }) {
+    const badges = document.querySelectorAll('[data-cart-count]');
 
-        this.updateCartCount();
-        this.initComplete = true;
+    badges.forEach((el) => {
+        el.textContent = count;
 
-        console.log('CHOKERZ: Корзина инициализирована');
-
-        return this;
-    }
-
-    /**
-     * Привязка событий
-     */
-    bindEvents() {
-        // Добавление товара в корзину
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('[data-add-to-cart]')) {
-                e.preventDefault();
-                const btn = e.target.closest('[data-add-to-cart]');
-                const productId = btn.dataset.productId;
-                const productName = btn.dataset.productName || 'Товар';
-                const productPrice = parseFloat(btn.dataset.productPrice) || 0;
-                const productImage = btn.dataset.productImage || '';
-
-                this.addItem({
-                    id: productId,
-                    name: productName,
-                    price: productPrice,
-                    image: productImage,
-                    quantity: 1
-                });
-            }
-        });
-    }
-
-    /**
-     * Добавить товар в корзину
-     * @param {Object} item - Товар
-     */
-    addItem(item) {
-        // Проверка наличия товара в корзине
-        const existingItem = this.cartItems.find(i => i.id === item.id);
-
-        if (existingItem) {
-            existingItem.quantity += item.quantity || 1;
+        if (count > 0) {
+            el.removeAttribute('hidden');
+            el.setAttribute('aria-label', `В корзине ${count} ${pluralItems(count)}`);
         } else {
-            this.cartItems.push(item);
+            el.setAttribute('hidden', '');
+            el.setAttribute('aria-label', 'Корзина пуста');
         }
+    });
+}
 
-        // Сохранение в localStorage
-        this.saveCart();
+function pluralItems(n) {
+    const mod10  = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return 'товар';
+    if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return 'товара';
+    return 'товаров';
+}
 
-        // Обновление счетчика
-        this.updateCartCount();
+// Таймер скрытия тоста хранится в замыкании модуля
+let _toastTimer = null;
 
-        // Показать уведомление
-        this.showNotification('Товар добавлен в корзину', 'success');
-
-        console.log('CHOKERZ: Товар добавлен в корзину', item);
+/**
+ * Показать всплывающее уведомление.
+ * Стили управляются CSS-классами: .cart-toast, .cart-toast--success,
+ * .cart-toast--error, .cart-toast--visible
+ * @param {string} message
+ * @param {'success'|'error'} type
+ */
+function showToast(message, type = 'success') {
+    let toast = document.getElementById('chokerz-cart-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'chokerz-cart-toast';
+        toast.className = 'cart-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
     }
 
-    /**
-     * Удалить товар из корзины
-     * @param {string} itemId - ID товара
-     */
-    removeItem(itemId) {
-        this.cartItems = this.cartItems.filter(item => item.id !== itemId);
-        this.saveCart();
-        this.updateCartCount();
+    toast.textContent = message;
 
-        console.log('CHOKERZ: Товар удален из корзины', itemId);
-    }
+    // Сброс модификаторов типа
+    toast.classList.remove('cart-toast--success', 'cart-toast--error');
+    toast.classList.add(`cart-toast--${type}`);
 
-    /**
-     * Обновить количество товара
-     * @param {string} itemId - ID товара
-     * @param {number} quantity - Количество
-     */
-    updateQuantity(itemId, quantity) {
-        const item = this.cartItems.find(i => i.id === itemId);
+    // Показать
+    toast.classList.add('cart-toast--visible');
 
-        if (item) {
-            item.quantity = Math.max(1, quantity);
-            this.saveCart();
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => {
+        toast.classList.remove('cart-toast--visible');
+    }, 3200);
+}
+
+// ── Обработчики действий ─────────────────────────────────────────────────────
+
+async function handleAdd(btn) {
+    const productId = btn.dataset.productId;
+    if (!productId) { warn('add: нет data-product-id'); return; }
+
+    btn.disabled = true;
+    try {
+        const data = await apiCall({ action: 'add', productId, quantity: btn.dataset.quantity || 1 });
+        if (data.success) {
+            applyCartState(data);
+            showToast(data.message || 'Товар добавлен в корзину', 'success');
+        } else {
+            showToast(data.message || 'Ошибка добавления', 'error');
         }
-
-        console.log('CHOKERZ: Количество товара обновлено', itemId, quantity);
-    }
-
-    /**
-     * Очистить корзину
-     */
-    clear() {
-        this.cartItems = [];
-        this.saveCart();
-        this.updateCartCount();
-
-        console.log('CHOKERZ: Корзина очищена');
-    }
-
-    /**
-     * Получить общее количество товаров
-     * @returns {number}
-     */
-    getTotalItems() {
-        return this.cartItems.reduce((total, item) => total + item.quantity, 0);
-    }
-
-    /**
-     * Получить общую стоимость
-     * @returns {number}
-     */
-    getTotalPrice() {
-        return this.cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    }
-
-    /**
-     * Обновить счетчик товаров
-     */
-    updateCartCount() {
-        const count = this.getTotalItems();
-
-        if (this.cartCountEl) {
-            if (count > 0) {
-                this.cartCountEl.textContent = count;
-                this.cartCountEl.style.display = 'block';
-            } else {
-                this.cartCountEl.style.display = 'none';
-            }
-        }
-    }
-
-    /**
-     * Сохранить корзину в localStorage
-     */
-    saveCart() {
-        localStorage.setItem('chokerz_cart', JSON.stringify(this.cartItems));
-    }
-
-    /**
-     * Загрузить корзину из localStorage
-     */
-    loadCart() {
-        const savedCart = localStorage.getItem('chokerz_cart');
-        
-        if (savedCart) {
-            try {
-                this.cartItems = JSON.parse(savedCart);
-            } catch (e) {
-                console.error('CHOKERZ: Ошибка загрузки корзины', e);
-                this.cartItems = [];
-            }
-        }
-    }
-
-    /**
-     * Показать уведомление
-     * @param {string} message - Сообщение
-     * @param {string} type - Тип (success, error, warning)
-     */
-    showNotification(message, type = 'success') {
-        // Создание уведомления
-        const notification = document.createElement('div');
-        notification.className = `notification notification--${type}`;
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background-color: ${type === 'success' ? '#28A745' : '#DC3545'};
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-        `;
-
-        // Добавление в документ
-        document.body.appendChild(notification);
-
-        // Удаление через 3 секунды
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
-
-        // Добавление анимаций
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    /**
-     * Проверка инициализации
-     */
-    isInitialized() {
-        return this.initComplete;
+    } catch (err) {
+        warn('handleAdd error', err);
+        showToast('Ошибка соединения с сервером', 'error');
+    } finally {
+        btn.disabled = false;
     }
 }
 
-// Создание экземпляра и экспорт
-const cart = new Cart();
+async function handleRemove(btn) {
+    const basketId = btn.dataset.basketId;
+    if (!basketId) { warn('remove: нет data-basket-id'); return; }
+
+    btn.disabled = true;
+    try {
+        const data = await apiCall({ action: 'remove', basketId });
+        if (data.success) {
+            applyCartState(data);
+            showToast(data.message || 'Товар удалён', 'success');
+
+            // Удалить строку товара из DOM, если она размечена
+            const row = btn.closest('[data-basket-item]');
+            if (row) row.remove();
+        } else {
+            showToast(data.message || 'Ошибка удаления', 'error');
+        }
+    } catch (err) {
+        warn('handleRemove error', err);
+        showToast('Ошибка соединения с сервером', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ── Инициализация ─────────────────────────────────────────────────────────────
+
+const cart = {
+    /**
+     * Инициализация модуля.
+     * Вызывать один раз после DOMContentLoaded.
+     */
+    async init() {
+        log('init');
+
+        // Делегированный клик
+        document.addEventListener('click', (e) => {
+            const addBtn    = e.target.closest('[data-action="add-to-cart"]');
+            const removeBtn = e.target.closest('[data-action="remove-from-cart"]');
+
+            if (addBtn)    { e.preventDefault(); handleAdd(addBtn); }
+            if (removeBtn) { e.preventDefault(); handleRemove(removeBtn); }
+        });
+
+        // Начальное состояние счётчика берём из DOM (PHP рендерит data-cart-count при загрузке страницы).
+        // Дополнительный HTTP-запрос при init не нужен.
+        const initialBadge = document.querySelector('[data-cart-count]');
+        if (initialBadge) {
+            const initialCount = parseInt(initialBadge.textContent, 10) || 0;
+            applyCartState({ count: initialCount });
+            log('initial count from DOM:', initialCount);
+        }
+    },
+};
 
 export default cart;
