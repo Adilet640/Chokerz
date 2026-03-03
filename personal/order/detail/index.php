@@ -8,16 +8,18 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
-global $USER;
-if (!$USER->IsAuthorized()) {
+use Bitrix\Main\Context;
+
+// Редирект неавторизованных — D7 API (CUser запрещён, п.10.2)
+$currentUser = Context::getCurrent()->getUser();
+if (!$currentUser || !$currentUser->isAuthorized()) {
     LocalRedirect(SITE_DIR . 'personal/login/?back_url=' . urlencode($_SERVER['REQUEST_URI']));
 }
 
 $APPLICATION->SetTitle('Заказ');
+$APPLICATION->SetPageProperty('description', 'Детальная информация о заказе в магазине CHOKERZ.');
 $APPLICATION->SetPageProperty('body_class', 'page-lk page-lk-order-detail');
 ?>
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/header.php'); ?>
 
 <div class="lk-layout">
     <div class="lk-layout__container container">
@@ -30,9 +32,9 @@ $APPLICATION->SetPageProperty('body_class', 'page-lk page-lk-order-detail');
                 'bitrix:sale.personal.order.detail',
                 '.default',
                 [
-                    'PATH_TO_LIST'  => '/personal/order/list/',
-                    'CACHE_TYPE'    => 'N',
-                    'SET_TITLE'     => 'N',
+                    'PATH_TO_LIST' => '/personal/order/list/',
+                    'CACHE_TYPE'   => 'N',
+                    'SET_TITLE'    => 'N',
                 ],
                 false
             );
@@ -41,5 +43,3 @@ $APPLICATION->SetPageProperty('body_class', 'page-lk page-lk-order-detail');
 
     </div>
 </div>
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/footer.php'); ?>
