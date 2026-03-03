@@ -6,9 +6,9 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
 
 use Bitrix\Main\Page\Asset;
 use Bitrix\Main\Application;
-use Bitrix\Sale\Basket;
 use Bitrix\Main\Loader;
-
+use Bitrix\Sale\Fuser;
+use Bitrix\Sale\Basket;
 
 $asset = Asset::getInstance();
 $asset->addCss(SITE_TEMPLATE_PATH . '/styles/main.css');
@@ -17,10 +17,17 @@ $asset->addJs(SITE_TEMPLATE_PATH . '/js/main.js', true); // defer через п�
 // ── Счётчик товаров в корзине (Bitrix D7 Sale API) ───────────────────────────
 $cartCount = 0;
 if (Loader::includeModule('sale')) {
-    $fUserId = \CSaleBasket::GetBasketUserID();
-    $cartCount = (int) \CSaleBasket::GetBasketItemsCount($fUserId, SITE_ID);
+    $fuserId   = Fuser::getId();
+    $cartCount = Basket::loadItemsForFUser($fuserId, SITE_ID)->getItemsCount();
 }
 
+// ── Контакты из настроек шаблона (без хардкода, управляется из админки) ──────
+// Настройки задаются в «Управление структурой → Шаблоны → CHOKERZ → Параметры шаблона»
+// или через инфоблок «Настройки сайта» (код SITE_SETTINGS).
+$templateParams  = $GLOBALS['TEMPLATE_PARAMS'] ?? [];
+$contactPhone    = htmlspecialcharsbx($templateParams['CONTACT_PHONE']    ?? '');
+$contactPhoneRaw = preg_replace('/[^+\d]/', '', $contactPhone);
+$contactEmail    = htmlspecialcharsbx($templateParams['CONTACT_EMAIL']    ?? '');
 
 $curPageDir = Application::getInstance()->getContext()->getRequest()->getRequestedPage();
 
@@ -46,7 +53,7 @@ function chkNavActive(string $path, string $curDir): string
     <?php
     /* SEO: мета-теги управляются из административной части */
     $APPLICATION->ShowMeta('description');
-    $APPLICATION->ShowMeta('keywords');
+    /* keywords намеренно не выводится: тег не имеет SEO-ценности (Google, 2009) */
 
     /* Canonical и Open Graph задаются в php_interface/include/events.php */
     ?>
@@ -60,39 +67,18 @@ function chkNavActive(string $path, string $curDir): string
     <!-- Open Graph — значения устанавливаются через $APPLICATION->SetPageProperty() -->
     <meta property="og:type"        content="website">
     <meta property="og:url"         content="https://<?= htmlspecialcharsbx(SITE_SERVER_NAME . $APPLICATION->GetCurPage()) ?>">
-    <meta property="og:title"       content="<?php $APPLICATION->ShowTitle(false) ?>">
+    <meta property="og:title"       content="<?= htmlspecialcharsbx((string)$APPLICATION->GetTitle()) ?>">
     <meta property="og:description" content="<?= htmlspecialcharsbx((string)$APPLICATION->GetProperty('og_description')) ?>">
     <meta property="og:image"       content="https://<?= htmlspecialcharsbx(SITE_SERVER_NAME) ?><?= SITE_TEMPLATE_PATH ?>/images/og-image.webp">
     <meta property="og:locale"      content="ru_RU">
 
     <?php $APPLICATION->ShowHead() ?>
-<!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Spectral:ital,wght@0,400;0,600;1,400&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
-    <!-- Base -->
-<link rel="stylesheet" href="/local/templates/chokerz/styles/base/variables.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/base/typography.css">
+    <!-- Шрифты подключаются локально через @font-face в base/typography.css (woff2/woff) -->
 
-<!-- Layout -->
-<link rel="stylesheet" href="/local/templates/chokerz/styles/layout/header.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/layout/footer.css">
+    <!-- CSRF sessid для AJAX-запросов (wishlist, cart и др.) -->
+    <input type="hidden" name="sessid" value="<?= bitrix_sessid() ?>">
 
-<!-- Blocks -->
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/hero.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/advantages.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/products.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/subscribe.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/catalog.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/filter.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/card.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/product-detail.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/checkout.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/lk.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/blog.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/modal.css">
-<link rel="stylesheet" href="/local/templates/chokerz/styles/blocks/search.css">
 </head>
 <body class="body<?= ($APPLICATION->GetProperty('body_class') ? ' ' . htmlspecialcharsbx($APPLICATION->GetProperty('body_class')) : '') ?>">
 
@@ -106,16 +92,19 @@ function chkNavActive(string $path, string $curDir): string
     <div class="header-top__container container">
 
         <address class="header-top__contacts">
-            <a href="tel:+74951234567" class="header-top__link">
+            <?php if ($contactPhone): ?>
+            <a href="tel:<?= $contactPhoneRaw ?>" class="header-top__link">
                 <!-- SVG: телефон -->
                 <svg class="header-top__icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                      aria-hidden="true" focusable="false">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.13 11.91 19.79 19.79 0 0 1 1.06 3.22 2 2 0 0 1 3.05 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
-                <span>+7 (495) 123-45-67</span>
+                <span><?= $contactPhone ?></span>
             </a>
-            <a href="mailto:info@chokerz.ru" class="header-top__link">
+            <?php endif ?>
+            <?php if ($contactEmail): ?>
+            <a href="mailto:<?= $contactEmail ?>" class="header-top__link">
                 <!-- SVG: email -->
                 <svg class="header-top__icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -123,8 +112,9 @@ function chkNavActive(string $path, string $curDir): string
                     <rect x="2" y="4" width="20" height="16" rx="2"/>
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                 </svg>
-                <span>info@chokerz.ru</span>
+                <span><?= $contactEmail ?></span>
             </a>
+            <?php endif ?>
         </address>
 
         <nav class="header-top__social" aria-label="Социальные сети">
@@ -457,8 +447,12 @@ function chkNavActive(string $path, string $curDir): string
 
         <!-- Мобильные контакты -->
         <div class="mobile-menu__contacts">
-            <a href="tel:+74951234567" class="mobile-menu__contact-link">+7 (495) 123-45-67</a>
-            <a href="mailto:info@chokerz.ru" class="mobile-menu__contact-link">info@chokerz.ru</a>
+            <?php if ($contactPhone): ?>
+            <a href="tel:<?= $contactPhoneRaw ?>" class="mobile-menu__contact-link"><?= $contactPhone ?></a>
+            <?php endif ?>
+            <?php if ($contactEmail): ?>
+            <a href="mailto:<?= $contactEmail ?>" class="mobile-menu__contact-link"><?= $contactEmail ?></a>
+            <?php endif ?>
         </div>
 
     </div>
