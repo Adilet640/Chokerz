@@ -8,17 +8,18 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
-global $USER;
-if (!$USER->IsAuthorized()) {
+use Bitrix\Main\Context;
+
+// Редирект неавторизованных — D7 API (CUser запрещён, п.10.2)
+$currentUser = Context::getCurrent()->getUser();
+if (!$currentUser || !$currentUser->isAuthorized()) {
     LocalRedirect(SITE_DIR . 'personal/login/?back_url=' . urlencode($_SERVER['REQUEST_URI']));
 }
 
 $APPLICATION->SetTitle('Мои заказы');
+$APPLICATION->SetPageProperty('description', 'История заказов в магазине CHOKERZ.');
 $APPLICATION->SetPageProperty('body_class', 'page-lk page-lk-orders');
-$APPLICATION->SetPageProperty('description', 'История заказов CHOKERZ');
 ?>
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/header.php'); ?>
 
 <div class="lk-layout">
     <div class="lk-layout__container container">
@@ -46,5 +47,3 @@ $APPLICATION->SetPageProperty('description', 'История заказов CHOK
 
     </div>
 </div>
-
-<?php require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/footer.php'); ?>
