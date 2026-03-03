@@ -14,7 +14,7 @@ $asset = Asset::getInstance();
 $asset->addCss(SITE_TEMPLATE_PATH . '/styles/main.css');
 $asset->addJs(SITE_TEMPLATE_PATH . '/js/main.js', true); // defer через параметр
 
-// ── Счётчик товаров в корзине (Bitrix D7 Sale API) ───────────────────────────
+
 $cartCount = 0;
 if (Loader::includeModule('sale')) {
     $fuserId   = Fuser::getId();
@@ -55,7 +55,7 @@ function chkNavActive(string $path, string $curDir): string
     $APPLICATION->ShowMeta('description');
     /* keywords намеренно не выводится: тег не имеет SEO-ценности (Google, 2009) */
 
-    /* Canonical и Open Graph задаются в php_interface/include/events.php */
+
     ?>
 
     <title><?php $APPLICATION->ShowTitle() ?></title>
@@ -64,7 +64,7 @@ function chkNavActive(string $path, string $curDir): string
     <link rel="icon" href="<?= SITE_TEMPLATE_PATH ?>/images/favicon.ico" type="image/x-icon" sizes="any">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= SITE_TEMPLATE_PATH ?>/images/apple-touch-icon.png">
 
-    <!-- Open Graph — значения устанавливаются через $APPLICATION->SetPageProperty() -->
+  
     <meta property="og:type"        content="website">
     <meta property="og:url"         content="https://<?= htmlspecialcharsbx(SITE_SERVER_NAME . $APPLICATION->GetCurPage()) ?>">
     <meta property="og:title"       content="<?= htmlspecialcharsbx((string)$APPLICATION->GetTitle()) ?>">
@@ -85,9 +85,7 @@ function chkNavActive(string $path, string $curDir): string
 <?php /* Панель управления (показывается авторизованным пользователям в режиме правки) */ ?>
 <div id="panel"><?php $APPLICATION->ShowPanel() ?></div>
 
-<!-- ════════════════════════════════════════════════════════════════════════════
-     TOP BAR — информационная строка над шапкой
-     ════════════════════════════════════════════════════════════════════════════ -->
+
 <div class="header-top" role="banner">
     <div class="header-top__container container">
 
@@ -155,19 +153,14 @@ function chkNavActive(string $path, string $curDir): string
     </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════════════════════
-     HEADER — основная шапка
-     ════════════════════════════════════════════════════════════════════════════ -->
+
+   
 <header class="header" role="banner" id="site-header">
     <div class="header__container container">
 
-        <!-- ── Логотип ─────────────────────────────────────────────────────── -->
+        
         <a href="/" class="header__logo" aria-label="CHOKERZ — амуниция для животных, перейти на главную">
-            <!--
-                Inline SVG логотипа:
-                - fill="currentColor" позволяет управлять цветом через CSS .header__logo
-                - aria-hidden="true" т.к. ссылка имеет aria-label
-            -->
+           
             <svg class="header__logo-icon"
                  xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 204.8 153.6"
@@ -191,7 +184,7 @@ function chkNavActive(string $path, string $curDir): string
             <span class="header__logo-text">CHOKERZ</span>
         </a>
 
-        <!-- ── Основная навигация ───────────────────────────────────────────── -->
+       
         <nav class="header__nav nav" id="main-nav" aria-label="Основное меню">
             <ul class="nav__list" role="list">
                 <li class="nav__item">
@@ -239,10 +232,10 @@ function chkNavActive(string $path, string $curDir): string
             </ul>
         </nav>
 
-        <!-- ── Правая группа: поиск + иконки ───────────────────────────────── -->
+        
         <div class="header__right">
 
-            <!-- Поисковая форма -->
+            
             <div class="header__search search" id="search-widget" role="search">
                 <form class="search__form"
                       action="/catalog/"
@@ -262,7 +255,7 @@ function chkNavActive(string $path, string $curDir): string
                             id="search-clear"
                             aria-label="Очистить поиск"
                             hidden>
-                        <!-- SVG: крестик очистки -->
+                      
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round"
                              aria-hidden="true" focusable="false">
@@ -271,7 +264,7 @@ function chkNavActive(string $path, string $curDir): string
                         </svg>
                     </button>
                     <button type="submit" class="search__btn" aria-label="Найти">
-                        <!-- SVG: лупа -->
+                      
                         <svg class="search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                              aria-hidden="true" focusable="false">
@@ -282,7 +275,7 @@ function chkNavActive(string $path, string $curDir): string
                 </form>
             </div>
 
-            <!-- Иконка: открыть поиск на мобильном -->
+            
             <button type="button"
                     class="header__action header__action--search-toggle"
                     id="search-toggle-mobile"
@@ -297,12 +290,12 @@ function chkNavActive(string $path, string $curDir): string
                 </svg>
             </button>
 
-            <!-- Иконка: избранное (wishlist) -->
+            
             <a href="/personal/wishlist/"
                class="header__action header__action--wishlist"
                aria-label="Избранное"
                data-wishlist-trigger>
-                <!-- SVG: сердце -->
+               
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                      aria-hidden="true" focusable="false">
@@ -314,11 +307,11 @@ function chkNavActive(string $path, string $curDir): string
                       hidden>0</span>
             </a>
 
-            <!-- Иконка: личный кабинет -->
+         
             <a href="/personal/"
                class="header__action header__action--profile"
                aria-label="Личный кабинет">
-                <!-- SVG: профиль -->
+                
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                      aria-hidden="true" focusable="false">
@@ -327,12 +320,12 @@ function chkNavActive(string $path, string $curDir): string
                 </svg>
             </a>
 
-            <!-- Иконка: корзина -->
+        
             <a href="/cart/"
                class="header__action header__action--cart"
                aria-label="Корзина, товаров: <?= $cartCount ?>"
                data-cart-trigger>
-                <!-- SVG: корзина -->
+            
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                      aria-hidden="true" focusable="false">
@@ -365,9 +358,7 @@ function chkNavActive(string $path, string $curDir): string
     </div>
 </header>
 
-<!-- ════════════════════════════════════════════════════════════════════════════
-     MOBILE MENU — drawer (управляется mobile-menu.js)
-     ════════════════════════════════════════════════════════════════════════════ -->
+
 <div class="mobile-menu"
      id="mobile-menu"
      role="dialog"
@@ -386,7 +377,7 @@ function chkNavActive(string $path, string $curDir): string
                     class="mobile-menu__close"
                     aria-label="Закрыть меню"
                     data-mobile-menu-close>
-                <!-- SVG: крестик -->
+            
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
                      aria-hidden="true" focusable="false">
@@ -396,7 +387,6 @@ function chkNavActive(string $path, string $curDir): string
             </button>
         </div>
 
-        <!-- Мобильный поиск -->
         <div class="mobile-menu__search" role="search">
             <form class="search__form search__form--mobile"
                   action="/catalog/"
@@ -421,7 +411,7 @@ function chkNavActive(string $path, string $curDir): string
             </form>
         </div>
 
-        <!-- Мобильная навигация -->
+      
         <nav class="mobile-menu__nav" aria-label="Мобильное меню">
             <ul class="mobile-menu__list" role="list">
                 <li class="mobile-menu__item">
@@ -445,7 +435,7 @@ function chkNavActive(string $path, string $curDir): string
             </ul>
         </nav>
 
-        <!-- Мобильные контакты -->
+    
         <div class="mobile-menu__contacts">
             <?php if ($contactPhone): ?>
             <a href="tel:<?= $contactPhoneRaw ?>" class="mobile-menu__contact-link"><?= $contactPhone ?></a>
